@@ -123,6 +123,7 @@ public partial class MainWindow : Window
         VersionText.Text = $"Version {UpdateService.Current}";
         UpdateStatusText.Text = updates.Status switch
         {
+            UpdateState.Idle => "Checks automatically on startup and every hour.",
             UpdateState.Checking => "Checking for updates…",
             UpdateState.UpToDate => "Up to date" + checkedAt,
             UpdateState.Available => $"Version {updates.Latest!.Version} is available{checkedAt}",

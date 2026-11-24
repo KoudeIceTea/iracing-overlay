@@ -12,7 +12,7 @@ namespace IracingOverlay.App.Updates;
 /// <summary>A published GitHub release ("v1.2.0") and its ZIP download.</summary>
 internal sealed record ReleaseInfo(Version Version, string Tag, string Name, string PageUrl, long? AssetId, string? AssetName);
 
-internal enum UpdateStatus { Checking, UpToDate, Available, NoReleases, Failed }
+internal enum UpdateStatus { Idle, Checking, UpToDate, Available, NoReleases, Failed }
 
 /// <summary>
 /// Checks the public GitHub repository for a newer release on start and every hour.
@@ -38,7 +38,7 @@ internal sealed class UpdateService : IDisposable
     /// <summary>Raised once per newer version, for the tray notification.</summary>
     public event Action<ReleaseInfo>? NewVersionFound;
 
-    public UpdateStatus Status { get; private set; } = UpdateStatus.Checking;
+    public UpdateStatus Status { get; private set; } = UpdateStatus.Idle;
     public ReleaseInfo? Latest { get; private set; }
     public DateTime? LastChecked { get; private set; }
     public string? Error { get; private set; }
