@@ -26,6 +26,16 @@ internal sealed class TrayIcon : IDisposable
         _tray.Visible = true;
     }
 
+    private Action? _balloonClick;
+
+    /// <summary>Windows notification from the tray icon; clicking it runs <paramref name="onClick"/>.</summary>
+    public void Notify(string title, string text, Action onClick)
+    {
+        if (_balloonClick == null) _tray.BalloonTipClicked += (_, _) => _balloonClick?.Invoke();
+        _balloonClick = onClick;
+        _tray.ShowBalloonTip(10000, title, text, ToolTipIcon.Info);
+    }
+
     public void Dispose()
     {
         _tray.Visible = false;

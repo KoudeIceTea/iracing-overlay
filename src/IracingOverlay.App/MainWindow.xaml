@@ -88,6 +88,23 @@
                             </DockPanel>
                         </Border>
 
+                        <TextBlock Style="{StaticResource SectionLabel}" Text="Updates" />
+                        <Border Style="{StaticResource SettingsGroup}">
+                            <StackPanel>
+                                <DockPanel Style="{StaticResource SettingRow}">
+                                    <TextBlock Style="{StaticResource RowIcon}" Text="&#xE896;" />
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Button x:Name="DownloadUpdate" Click="OnDownloadUpdate" Margin="0,0,8,0" Visibility="Collapsed" />
+                                        <Button x:Name="CheckUpdates" Content="Check now" Click="OnCheckUpdates" />
+                                    </StackPanel>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock x:Name="VersionText" Style="{StaticResource SettingName}" />
+                                        <TextBlock x:Name="UpdateStatusText" Style="{StaticResource SettingHint}" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+
                         <TextBlock Style="{StaticResource SettingHint}" Margin="2,4,0,0" Foreground="{StaticResource S.TextFaint}"
                                    Text="Closing this window keeps the overlays running. To quit, choose Exit from the tray menu." />
                     </settings:ReadableColumn>

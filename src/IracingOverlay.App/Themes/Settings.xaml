@@ -138,6 +138,28 @@
         <Setter Property="FontSize" Value="12" />
     </Style>
 
+    <!-- ===== Password field (update token) ===== -->
+    <Style TargetType="PasswordBox">
+        <Setter Property="Foreground" Value="{StaticResource S.Text}" />
+        <Setter Property="Background" Value="{StaticResource S.Control}" />
+        <Setter Property="BorderBrush" Value="{StaticResource S.ControlStroke}" />
+        <Setter Property="CaretBrush" Value="{StaticResource S.Text}" />
+        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="PasswordBox">
+                    <Border x:Name="Box" CornerRadius="6" BorderThickness="1"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource S.Accent}" /></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <!-- ===== Dropdown ===== -->
     <Style TargetType="ComboBoxItem">
         <Setter Property="Foreground" Value="{StaticResource S.Text}" />

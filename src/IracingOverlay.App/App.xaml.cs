@@ -4,6 +4,7 @@ using System.Windows.Threading;
 using IracingOverlay.App.Interop;
 using IracingOverlay.App.Overlays;
 using IracingOverlay.App.Settings;
+using IracingOverlay.App.Updates;
 using IracingOverlay.App.ViewModels;
 using IracingOverlay.Core;
 using IracingOverlay.Core.Race;
@@ -19,6 +20,7 @@ public partial class App : Application
     private AppSettings _settings = new();
     private TelemetryService? _telemetry;
     private TrayIcon? _tray;
+    internal UpdateService Updates { get; private set; } = null!;
     internal bool IsExiting { get; private set; }
     private StandingsOverlay? _standings;
     private RelativeOverlay? _relative;
@@ -75,10 +77,15 @@ public partial class App : Application
         _telemetry.SnapshotUpdated += OnSnapshot;
         _telemetry.ConnectionChanged += connected => Dispatcher.BeginInvoke(() => SetConnected(connected));
 
+        Updates = new UpdateService(_settings);
         MainWindow = new MainWindow(this);
         // F6 is registered on this HWND even before settings are opened for the first time.
         new WindowInteropHelper(MainWindow).EnsureHandle();
         _tray = new TrayIcon(OpenSettings, ExitFromTray);
+        // Update check: on start and every hour; a tray notification once per new version.
+        Updates.NewVersionFound += release => _tray?.Notify("iRacing Overlay update",
+            $"Version {release.Version} is available (you have {UpdateService.Current}). Click to open Settings.", OpenSettings);
+        Updates.Start();
 
         _visibilityTimer.Tick += (_, _) => UpdateVisibility();
         UpdatePollingInterval();
@@ -110,6 +117,7 @@ public partial class App : Application
     protected override void OnExit(ExitEventArgs e)
     {
         _visibilityTimer.Stop();
+        Updates?.Dispose();
         _tray?.Dispose();
         _telemetry?.Dispose();
         _settings.Save();

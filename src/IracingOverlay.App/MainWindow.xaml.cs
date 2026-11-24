@@ -1,9 +1,13 @@
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 using IracingOverlay.App.Interop;
+using IracingOverlay.App.Updates;
+using UpdateState = IracingOverlay.App.Updates.UpdateStatus; // the window already has an UpdateStatus() method
 
 namespace IracingOverlay.App;
 
@@ -35,6 +39,8 @@ public partial class MainWindow : Window
         FocusCheck.Unchecked += OnFocusToggled;
 
         app.ConnectionStateChanged += UpdateStatus;
+        app.Updates.Changed += ShowUpdateState;
+        ShowUpdateState();
         UpdateStatus();
     }
 
@@ -107,4 +113,53 @@ public partial class MainWindow : Window
     }
 
     private void OnResetPositions(object sender, RoutedEventArgs e) => _app.ResetPositions();
+
+    // ----- Updates -----
+
+    private void ShowUpdateState()
+    {
+        var updates = _app.Updates;
+        string checkedAt = updates.LastChecked is DateTime at ? $" · checked {at:HH:mm}" : "";
+        VersionText.Text = $"Version {UpdateService.Current}";
+        UpdateStatusText.Text = updates.Status switch
+        {
+            UpdateState.Checking => "Checking for updates…",
+            UpdateState.UpToDate => "Up to date" + checkedAt,
+            UpdateState.Available => $"Version {updates.Latest!.Version} is available{checkedAt}",
+            UpdateState.NoReleases => "No releases published yet" + checkedAt,
+            _ => $"Couldn't check for updates: {updates.Error}{checkedAt}",
+        };
+        bool canDownload = updates.Status == UpdateState.Available && updates.Latest?.AssetId != null;
+        DownloadUpdate.Visibility = canDownload ? Visibility.Visible : Visibility.Collapsed;
+        if (canDownload && DownloadUpdate.IsEnabled) DownloadUpdate.Content = $"Download {updates.Latest!.Tag}";
+        CheckUpdates.IsEnabled = updates.Status != UpdateState.Checking;
+    }
+
+    private async void OnCheckUpdates(object sender, RoutedEventArgs e) => await _app.Updates.CheckAsync();
+
+    private async void OnDownloadUpdate(object sender, RoutedEventArgs e)
+    {
+        DownloadUpdate.IsEnabled = false;
+        try
+        {
+            var progress = new Progress<double>(done => DownloadUpdate.Content = $"Downloading… {done:P0}");
+            string path = await _app.Updates.DownloadAsync(progress);
+            DownloadUpdate.Content = "Downloaded";
+            UpdateStatusText.Text = $"Saved {Path.GetFileName(path)} in Downloads. Exit the app from the tray, extract the ZIP " +
+                "(over the old version or anywhere) and start it again. Your settings are kept.";
+            Process.Start("explorer.exe", $"/select,\"{path}\"");
+        }
+        catch (Exception ex)
+        {
+            DownloadUpdate.IsEnabled = true;
+            UpdateStatusText.Text = "Download failed: " + ex.Message;
+            ShowUpdateState();
+        }
+    }
+
+    private void OnOpenLink(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+    {
+        Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+        e.Handled = true;
+    }
 }
