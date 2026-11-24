@@ -1,0 +1,156 @@
+<local:OverlayWindow x:Class="IracingOverlay.App.Overlays.StandingsOverlay"
+                     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:local="clr-namespace:IracingOverlay.App.Overlays"
+                     xmlns:vm="clr-namespace:IracingOverlay.App.ViewModels"
+                     Title="Standings">
+    <!-- Column widths shared by the column header and rows -->
+    <local:OverlayWindow.Resources>
+
+
+        <Style x:Key="StandingsColumnLabel" TargetType="TextBlock" BasedOn="{StaticResource ColumnHeader}">
+            <Setter Property="Foreground" Value="#B7C2D1" />
+            <Setter Property="FontSize" Value="10.5" />
+        </Style>
+
+        <Style x:Key="ClassRow" TargetType="FrameworkElement">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Visibility" Value="{DynamicResource Content.ClassRow}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsFirst}" Value="True">
+                    <Setter Property="Visibility" Value="{DynamicResource Content.FirstClassRow}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <BooleanToVisibilityConverter x:Key="ShowFlag" />
+        <DataTemplate DataType="{x:Type vm:ClassHeaderViewModel}">
+            <local:FieldGrid Widths="{DynamicResource Content.Widths}" Style="{StaticResource ClassRow}">
+                <DockPanel Visibility="{DynamicResource Content.Class}" Grid.Column="{DynamicResource Index.Class}" Grid.ColumnSpan="{DynamicResource Content.ClassSpan}" Margin="12,0,8,0" VerticalAlignment="Center">
+                    <Border DockPanel.Dock="Left" Style="{StaticResource Pill}" Background="{Binding ClassBackground}"
+                            MaxWidth="205" Margin="0,0,10,0">
+                        <TextBlock Style="{StaticResource PillText}" Text="{Binding ClassName}" TextTrimming="CharacterEllipsis"
+                                   Foreground="{Binding ClassForeground}" />
+                    </Border>
+                    <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" Text="&#xE716;" ToolTip="Cars in class" />
+                    <TextBlock Text="{Binding Details}" Foreground="#B7C2D1" FontSize="11" FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                </DockPanel>
+                <local:FieldGrid Grid.ColumnSpan="{DynamicResource Content.ColumnCount}" Widths="{DynamicResource Content.Widths}" IsHitTestVisible="False">
+                    <local:FieldGrid.Style>
+                        <Style TargetType="local:FieldGrid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsFirst}" Value="True">
+                                    <Setter Property="Visibility" Value="{DynamicResource Content.ColumnNames}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </local:FieldGrid.Style>
+                    <TextBlock Grid.Column="{DynamicResource Index.License}" Visibility="{DynamicResource Content.License}" Style="{StaticResource StandingsColumnLabel}" Text="LIC" HorizontalAlignment="Center" Margin="0" />
+                    <TextBlock Grid.Column="{DynamicResource Index.Rating}" Visibility="{DynamicResource Content.Rating}" Style="{StaticResource StandingsColumnLabel}" Text="iRating" Margin="0,0,42,0" />
+                    <TextBlock Grid.Column="{DynamicResource Index.Gap}" Visibility="{DynamicResource Content.Gap}" Style="{StaticResource StandingsColumnLabel}" Text="GAP" />
+                    <TextBlock Grid.Column="{DynamicResource Index.Interval}" Visibility="{DynamicResource Content.Interval}" Style="{StaticResource StandingsColumnLabel}" Text="INT" />
+                    <TextBlock Grid.Column="{DynamicResource Index.Best}" Visibility="{DynamicResource Content.Best}" Style="{StaticResource StandingsColumnLabel}" Text="BEST" />
+                    <TextBlock Grid.Column="{DynamicResource Index.Last}" Visibility="{DynamicResource Content.Last}" Style="{StaticResource StandingsColumnLabel}" Text="LAST" />
+                    <TextBlock Grid.Column="{DynamicResource Index.Average}" Visibility="{DynamicResource Content.Average}" Style="{StaticResource StandingsColumnLabel}" Text="AVG 10" />
+                </local:FieldGrid>
+                <Border Grid.ColumnSpan="{DynamicResource Content.ColumnCount}" Height="1" Margin="12,0" VerticalAlignment="Bottom" Background="{Binding LineBrush}" />
+            </local:FieldGrid>
+        </DataTemplate>
+
+        <!-- Driver row -->
+        <DataTemplate DataType="{x:Type vm:RowViewModel}">
+            <local:StandingsDriverGrid Widths="{DynamicResource Content.Widths}" Height="{Binding RowHeight}" Visibility="{DynamicResource Content.Rows}" Background="{Binding RowBackground}">
+
+                <Border Grid.Column="0" Style="{StaticResource FocusMarker}" HorizontalAlignment="Left" />
+                <TextBlock Grid.Column="{DynamicResource Index.Position}" Visibility="{DynamicResource Content.Position}" Style="{StaticResource PosCell}" Text="{Binding Position}" />
+                <TextBlock Grid.Column="{DynamicResource Index.Change}" Visibility="{DynamicResource Content.Change}" Style="{StaticResource Cell}" Text="{Binding PositionChange}"
+                           Foreground="{Binding PositionChangeForeground}" FontSize="10.5" FontWeight="Bold" HorizontalAlignment="Left" />
+
+                <TextBlock Grid.Column="{DynamicResource Index.Number}" Visibility="{DynamicResource Content.Number}" Style="{StaticResource CarNumberCell}"
+                           Text="{Binding CarNumber}" Foreground="{Binding NumberForeground}" />
+
+                <ContentPresenter Grid.Column="{DynamicResource Index.Brand}" Visibility="{DynamicResource Content.Brand}" Content="{Binding}" ContentTemplate="{StaticResource DriverBrandCell}" />
+
+                <ContentPresenter Grid.Column="{DynamicResource Index.Flag}" Visibility="{DynamicResource Content.Flag}" Content="{Binding}" ContentTemplate="{StaticResource DriverFlagCell}" />
+
+                <ContentPresenter Grid.Column="{DynamicResource Index.Name}" Visibility="{DynamicResource Content.Name}" Content="{Binding}" ContentTemplate="{StaticResource DriverNameCell}" />
+
+                <ContentPresenter Grid.Column="{DynamicResource Index.Pit}" Visibility="{DynamicResource Content.Pit}" Content="{Binding}" ContentTemplate="{StaticResource DriverPitCell}" />
+
+                <Image Grid.Column="{DynamicResource Index.Tyre}" Visibility="{DynamicResource Content.Tyre}" Source="{Binding Tyre}" Width="18" Height="18" RenderOptions.BitmapScalingMode="HighQuality"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                <Border Grid.Column="{DynamicResource Index.License}" Visibility="{DynamicResource Content.License}" Style="{StaticResource Badge}"
+                        Background="{Binding LicenseBackground}" BorderBrush="{Binding LicenseBorder}">
+                    <TextBlock Style="{StaticResource BadgeText}" Text="{Binding License}" Foreground="{Binding LicenseForeground}" />
+                </Border>
+
+                <StackPanel Grid.Column="{DynamicResource Index.Rating}" Visibility="{DynamicResource Content.Rating}" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,8,0">
+                    <TextBlock Style="{StaticResource Cell}" Text="{Binding IRating}" FontWeight="Medium" />
+                    <TextBlock Style="{StaticResource Cell}" Text="{Binding IRatingChange}" Foreground="{Binding IRatingChangeForeground}"
+                               FontSize="10.5" FontWeight="Bold" Margin="4,1,0,0" MinWidth="30" />
+                </StackPanel>
+
+                <TextBlock Grid.Column="{DynamicResource Index.Gap}" Visibility="{DynamicResource Content.Gap}" Style="{StaticResource NumCell}" Text="{Binding Gap}" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="{DynamicResource Index.Interval}" Visibility="{DynamicResource Content.Interval}" Style="{StaticResource NumCell}" Text="{Binding Interval}" Foreground="{StaticResource DimTextBrush}" />
+                <TextBlock Grid.Column="{DynamicResource Index.Best}" Visibility="{DynamicResource Content.Best}" Style="{StaticResource NumCell}" Text="{Binding BestLap}" Foreground="{Binding BestLapForeground}" />
+                <TextBlock Grid.Column="{DynamicResource Index.Last}" Visibility="{DynamicResource Content.Last}" Style="{StaticResource NumCell}" Text="{Binding LastLap}" Foreground="{Binding LastLapForeground}" />
+                <TextBlock Grid.Column="{DynamicResource Index.Average}" Visibility="{DynamicResource Content.Average}" Style="{StaticResource NumCell}" Text="{Binding AverageLap}" Margin="0,0,12,0" />
+            </local:StandingsDriverGrid>
+        </DataTemplate>
+    </local:OverlayWindow.Resources>
+
+    <Grid HorizontalAlignment="Left">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="{DynamicResource Panel.Width}" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Border Style="{StaticResource GlassHeader}" Visibility="{DynamicResource Header.Visible}" Margin="{DynamicResource Header.Margin}">
+            <local:SessionStrip x:Name="HeaderStrip" />
+        </Border>
+
+        <!-- Standings body -->
+        <Border Grid.Row="1" Grid.RowSpan="2" Style="{StaticResource GlassPanel}" Visibility="{DynamicResource Body.Visible}" />
+
+        <ItemsControl Grid.Row="1" Margin="1,0" ItemsSource="{Binding StandingItems}" ClipToBounds="True" />
+        <Border Grid.Row="2" Margin="1,0,1,6" Visibility="{DynamicResource Footer.Visible}" MinHeight="30" Padding="12,3">
+            <local:SessionStrip x:Name="FooterStrip" />
+        </Border>
+        <!-- The badge list uses the same items and heights as the table. Its auto-sized
+             gutter collapses to zero when every visible driver has a clean row. -->
+        <ItemsControl Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Left"
+                      ItemsSource="{Binding StandingItems}" Visibility="{DynamicResource Penalty.Visible}">
+            <ItemsControl.Resources>
+                <DataTemplate DataType="{x:Type vm:ClassHeaderViewModel}">
+                    <Border Width="0" Style="{StaticResource ClassRow}" />
+                </DataTemplate>
+                <DataTemplate DataType="{x:Type vm:RowViewModel}">
+                    <Grid Height="{Binding RowHeight}">
+                        <Border Style="{StaticResource GlassPanel}" CornerRadius="4" Padding="4,1" Margin="3,0,0,0"
+                                Background="#ED191D24" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                Visibility="{Binding HasPenalty, Converter={StaticResource ShowFlag}}">
+                            <!-- Flags as icons (black, slowdown = furled black, meatball), then how long the most
+                                 important one has been up, "DQ", or your own repair time left. -->
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="23" Height="18" Source="{Binding BlackFlagIcon}" RenderOptions.BitmapScalingMode="HighQuality"
+                                       Visibility="{Binding BlackFlag, Converter={StaticResource ShowFlag}}" />
+                                <Image Width="23" Height="18" Source="{Binding SlowdownIcon}" RenderOptions.BitmapScalingMode="HighQuality"
+                                       Visibility="{Binding Slowdown, Converter={StaticResource ShowFlag}}" />
+                                <Image Width="23" Height="18" Source="{Binding RepairIcon}" RenderOptions.BitmapScalingMode="HighQuality"
+                                       Visibility="{Binding Meatball, Converter={StaticResource ShowFlag}}" />
+                                <TextBlock Text="{Binding PenaltyText}" VerticalAlignment="Center" FontSize="10.5" FontWeight="Bold"
+                                           Foreground="#FFF4F5F7" Margin="4,0,1,0" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </DataTemplate>
+            </ItemsControl.Resources>
+        </ItemsControl>
+    </Grid>
+</local:OverlayWindow>

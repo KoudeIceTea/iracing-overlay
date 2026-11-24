@@ -1,0 +1,178 @@
+<UserControl x:Class="IracingOverlay.App.Settings.OverlayOptions"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:settings="clr-namespace:IracingOverlay.App.Settings">
+    <!-- Loaded here too: this control is built before it is placed in the settings window. -->
+    <UserControl.Resources>
+        <ResourceDictionary Source="/IracingOverlay;component/Themes/Settings.xaml" />
+    </UserControl.Resources>
+    <TabControl x:Name="SectionTabs" SelectedIndex="0" Background="Transparent" BorderThickness="0"
+                ItemContainerStyle="{StaticResource SegmentTab}">
+        <TabControl.Template>
+            <ControlTemplate TargetType="TabControl">
+                <DockPanel>
+                    <!-- Segmented control -->
+                    <Border DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="0,0,0,20" Padding="2"
+                            Background="{StaticResource S.Card}" BorderBrush="{StaticResource S.Stroke}" BorderThickness="1" CornerRadius="8">
+                        <StackPanel IsItemsHost="True" Orientation="Horizontal" KeyboardNavigation.TabIndex="0" />
+                    </Border>
+                    <TabControl x:Name="SessionTabs" DockPanel.Dock="Top" HorizontalAlignment="Left" Margin="0,0,0,14"
+                                SelectedIndex="0" SelectionChanged="OnSessionSelected" Visibility="Collapsed"
+                                AutomationProperties.Name="Session layout" ItemContainerStyle="{StaticResource SegmentTab}">
+                        <TabControl.Template>
+                            <ControlTemplate TargetType="TabControl">
+                                <Border BorderBrush="{StaticResource S.Stroke}" BorderThickness="0,0,0,1" Padding="0,0,0,3">
+                                    <TabPanel IsItemsHost="True" />
+                                </Border>
+                            </ControlTemplate>
+                        </TabControl.Template>
+                        <TabItem Header="Practice" Tag="{x:Static settings:LayoutSession.Practice}" />
+                        <TabItem Header="Qualifying" Tag="{x:Static settings:LayoutSession.Qualifying}" />
+                        <TabItem Header="Race" Tag="{x:Static settings:LayoutSession.Race}" />
+                    </TabControl>
+                    <ScrollViewer Focusable="False" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ContentPresenter x:Name="PART_SelectedContentHost" ContentSource="SelectedContent" />
+                    </ScrollViewer>
+                </DockPanel>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="Tag" Value="Separate">
+                        <Setter TargetName="SessionTabs" Property="Visibility" Value="Visible" />
+                    </Trigger>
+                    <Trigger Property="SelectedIndex" Value="0">
+                        <Setter TargetName="SessionTabs" Property="Visibility" Value="Collapsed" />
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+        </TabControl.Template>
+
+        <!-- ===== Overlay ===== -->
+        <TabItem Header="General">
+            <settings:ReadableColumn Style="{StaticResource PageColumn}">
+                <TextBlock Style="{StaticResource SectionLabel}" Text="Display" />
+                <Border Style="{StaticResource SettingsGroup}">
+                    <StackPanel>
+                        <DockPanel Style="{StaticResource SettingRow}">
+                            <TextBlock Style="{StaticResource RowIcon}" Text="&#xE7F4;" />
+                            <CheckBox x:Name="ShowOverlay" VerticalAlignment="Center">
+                                <StackPanel>
+                                    <TextBlock x:Name="ShowOverlayTitle" Style="{StaticResource SettingName}" />
+                                    <TextBlock Style="{StaticResource SettingHint}" Text="Turn this overlay on or off." />
+                                </StackPanel>
+                            </CheckBox>
+                        </DockPanel>
+                        <Border Style="{StaticResource RowDivider}" />
+                        <DockPanel Style="{StaticResource SettingRow}">
+                            <TextBlock Style="{StaticResource RowIcon}" Text="&#xE740;" />
+                            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" VerticalAlignment="Center">
+                                <Button x:Name="Smaller" Style="{StaticResource IconButton}" Content="&#xE738;" Click="OnSmaller"
+                                        AutomationProperties.Name="Decrease overlay scale" />
+                                <TextBlock x:Name="ScaleValue" MinWidth="60" TextAlignment="Center" VerticalAlignment="Center" FontWeight="SemiBold" />
+                                <Button x:Name="Larger" Style="{StaticResource IconButton}" Content="&#xE710;" Click="OnLarger"
+                                        AutomationProperties.Name="Increase overlay scale" />
+                            </StackPanel>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource SettingName}" Text="Overlay scale" />
+                                <TextBlock Style="{StaticResource SettingHint}" Text="You can also scroll on the overlay in Edit mode (F6)." />
+                            </StackPanel>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock Style="{StaticResource SectionLabel}" Text="Session layouts" />
+                <Border Style="{StaticResource SettingsGroup}">
+                    <DockPanel Style="{StaticResource SettingRow}">
+                        <TextBlock Style="{StaticResource RowIcon}" Text="&#xE895;" />
+                        <CheckBox x:Name="SyncLayouts" AutomationProperties.Name="Sync layouts between sessions">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource SettingName}" Text="Sync layouts between sessions" />
+                                <TextBlock Style="{StaticResource SettingHint}" Text="Share Content, Header and Footer across practice, qualifying and race." />
+                            </StackPanel>
+                        </CheckBox>
+                    </DockPanel>
+                </Border>
+
+                <TextBlock x:Name="DriverTitle" Style="{StaticResource SectionLabel}" Text="Drivers" />
+                <Border x:Name="DriverGroup" Style="{StaticResource SettingsGroup}">
+                    <StackPanel>
+                        <DockPanel Style="{StaticResource SettingRow}">
+                            <TextBlock Style="{StaticResource RowIcon}" Text="&#xE722;" />
+                            <CheckBox x:Name="FollowCamera" AutomationProperties.Name="Follow spectated car">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource SettingName}" Text="Follow spectated car" />
+                                    <TextBlock Style="{StaticResource SettingHint}" Text="Use the car you’re watching as the focus of this overlay while out of the car." />
+                                </StackPanel>
+                            </CheckBox>
+                        </DockPanel>
+                        <Border Style="{StaticResource RowDivider}" />
+                        <StackPanel x:Name="StandingsOptions">
+                            <DockPanel Style="{StaticResource SettingRow}">
+                                <TextBlock Style="{StaticResource RowIcon}" Text="&#xE8FD;" />
+                                <ComboBox x:Name="OtherRows" DockPanel.Dock="Right" Width="90" VerticalAlignment="Center"
+                                          AutomationProperties.Name="Drivers per other class" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource SettingName}" Text="Drivers per other class" />
+                                    <TextBlock Style="{StaticResource SettingHint}" Text="Show this many leaders per class. Zero shows just the class summary." />
+                                </StackPanel>
+                            </DockPanel>
+                            <Border Style="{StaticResource RowDivider}" />
+                            <DockPanel Style="{StaticResource SettingRow}">
+                                <TextBlock Style="{StaticResource RowIcon}" Text="&#xE7C1;" />
+                                <CheckBox x:Name="AnimatePositions" Content="Animate position changes" />
+                            </DockPanel>
+                            <Border Style="{StaticResource RowDivider}" />
+                        </StackPanel>
+                        <DockPanel Style="{StaticResource SettingRow}">
+                            <TextBlock Style="{StaticResource RowIcon}" Text="&#xE77B;" />
+                            <ComboBox x:Name="NameFormatChoice" DockPanel.Dock="Right" Width="290" VerticalAlignment="Center"
+                                      AutomationProperties.Name="Driver name format" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource SettingName}" Text="Driver names" />
+                                <TextBlock Style="{StaticResource SettingHint}" Text="How names are written in this overlay." />
+                            </StackPanel>
+                        </DockPanel>
+                        <Border Style="{StaticResource RowDivider}" />
+                        <DockPanel Style="{StaticResource SettingRow}">
+                            <TextBlock Style="{StaticResource RowIcon}" Text="&#xE716;" />
+                            <CheckBox x:Name="ShowTeams" VerticalAlignment="Center" AutomationProperties.Name="Show team names in team races">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource SettingName}" Text="Show team names in team races" />
+                                    <TextBlock Style="{StaticResource SettingHint}"
+                                               Text="Team name on top, the driver currently in the car below. Sessions without teams always show just the driver." />
+                                </StackPanel>
+                            </CheckBox>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+            </settings:ReadableColumn>
+        </TabItem>
+
+        <!-- ===== Content / Header / Footer: toggle + drag to reorder ===== -->
+        <TabItem Header="Content">
+            <settings:ReadableColumn Style="{StaticResource PageColumn}">
+                <Border x:Name="ColumnNamesCard" Style="{StaticResource SettingsCard}" Margin="0,0,0,12">
+                    <StackPanel>
+                        <CheckBox x:Name="ColumnNames" Content="Show column names beside the first class" />
+                        <CheckBox x:Name="PenaltyBadges" Margin="0,10,0,0" Content="Show penalty badges beside drivers" />
+                    </StackPanel>
+                </Border>
+                <TextBlock x:Name="ContentHint" Style="{StaticResource SettingHint}" Margin="2,0,0,12"
+                           Text="Choose the columns in the table. Drag the handle to change their order." />
+                <Border Style="{StaticResource SettingsCard}"><settings:ReorderableFields x:Name="ContentChoices" /></Border>
+            </settings:ReadableColumn>
+        </TabItem>
+        <TabItem Header="Header">
+            <settings:ReadableColumn Style="{StaticResource PageColumn}">
+                <TextBlock Style="{StaticResource SettingHint}" Margin="2,0,0,12"
+                           Text="Items in the bar above the table. Turn them all off to hide the bar." />
+                <Border Style="{StaticResource SettingsCard}"><settings:ReorderableFields x:Name="HeaderChoices" /></Border>
+            </settings:ReadableColumn>
+        </TabItem>
+        <TabItem Header="Footer">
+            <settings:ReadableColumn Style="{StaticResource PageColumn}">
+                <TextBlock Style="{StaticResource SettingHint}" Margin="2,0,0,12"
+                           Text="Items in the bar below the table. Turn them all off to hide the bar." />
+                <Border Style="{StaticResource SettingsCard}"><settings:ReorderableFields x:Name="FooterChoices" /></Border>
+            </settings:ReadableColumn>
+        </TabItem>
+    </TabControl>
+</UserControl>

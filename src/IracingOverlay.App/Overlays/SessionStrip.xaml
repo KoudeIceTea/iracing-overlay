@@ -1,0 +1,74 @@
+<UserControl x:Class="IracingOverlay.App.Overlays.SessionStrip"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:IracingOverlay.App.Overlays" Focusable="False">
+    <UserControl.Resources>
+        <Style TargetType="StackPanel" x:Key="Field" BasedOn="{StaticResource HeaderGroup}">
+            <Setter Property="Margin" Value="0,1,12,1" />
+        </Style>
+    </UserControl.Resources>
+    <DockPanel VerticalAlignment="Center">
+        <StackPanel x:Name="TrailingFields" DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+            <StackPanel Style="{StaticResource Field}" Tag="Clock">
+                <TextBlock Style="{StaticResource Icon}" Text="&#xE121;" />
+                <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding Clock}" />
+            </StackPanel>
+            <StackPanel Style="{StaticResource Field}" Tag="GameTime">
+                <TextBlock Style="{StaticResource Icon}" Text="&#xE706;" />
+                <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding GameTime}" />
+            </StackPanel>
+        </StackPanel>
+        <StackPanel x:Name="LeadingFields" Orientation="Horizontal" VerticalAlignment="Center">
+            <Border Style="{StaticResource Pill}" Background="#334DA3FF" Tag="Session">
+                <TextBlock Style="{StaticResource PillText}" Text="{Binding SessionBadge}" ToolTip="{Binding SessionType}"
+                           AutomationProperties.Name="{Binding SessionType}" Foreground="#9CCBFF" />
+            </Border>
+            <StackPanel Style="{StaticResource Field}" Tag="Remaining">
+                <TextBlock Style="{StaticResource Icon}" Text="&#xE916;" />
+                <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding TimeRemaining}" />
+            </StackPanel>
+            <StackPanel Style="{StaticResource Field}" Tag="Laps">
+                <TextBlock Style="{StaticResource HeaderLabel}" Text="LAP" />
+                <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding Laps}" />
+            </StackPanel>
+            <StackPanel Style="{StaticResource Field}" Tag="Cars">
+                <TextBlock Style="{StaticResource Icon}" Text="&#xE716;" />
+                <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding TotalCars}" />
+            </StackPanel>
+            <StackPanel Style="{StaticResource Field}" Tag="Air">
+                <TextBlock Style="{StaticResource Icon}" Text="&#xE9CA;" />
+                <TextBlock Style="{StaticResource HeaderLabel}" Text="AIR" />
+                <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding AirTemp}" />
+            </StackPanel>
+            <StackPanel Style="{StaticResource Field}" Tag="Track">
+                <TextBlock Style="{StaticResource HeaderLabel}" Text="TRK" />
+                <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding TrackTemp}" />
+            </StackPanel>
+            <Border Tag="Wind">
+                <StackPanel Style="{StaticResource Field}" Visibility="{Binding WindSpeed, Converter={x:Static local:Converters.EmptyToCollapsed}}">
+                    <TextBlock Style="{StaticResource HeaderLabel}" Text="WIND" />
+                    <Path Width="18" Height="18" Margin="0,0,5,0" VerticalAlignment="Center" Fill="{StaticResource AccentBrush}"
+                          Data="M9,1 L15.5,8.5 L11,8.5 L11,17 L7,17 L7,8.5 L2.5,8.5 Z" RenderTransformOrigin="0.5,0.5">
+                        <Path.RenderTransform><RotateTransform Angle="{Binding WindArrowAngle}" /></Path.RenderTransform>
+                    </Path>
+                    <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding WindSpeed}" />
+                    <TextBlock Style="{StaticResource HeaderLabel}" Text="KM/H" Margin="3,1,0,0" />
+                </StackPanel>
+            </Border>
+            <StackPanel Style="{StaticResource Field}" Tag="Sof">
+                <TextBlock Style="{StaticResource HeaderLabel}" Text="SOF" />
+                <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding Sof}" />
+            </StackPanel>
+            <Border Tag="Bias">
+                <StackPanel Style="{StaticResource Field}" Visibility="{Binding BrakeBias, Converter={x:Static local:Converters.EmptyToCollapsed}}">
+                    <TextBlock Style="{StaticResource HeaderLabel}" Text="BB" />
+                    <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding BrakeBias}" />
+                </StackPanel>
+            </Border>
+            <StackPanel Style="{StaticResource Field}" Tag="Incidents">
+                <TextBlock Style="{StaticResource HeaderLabel}" Text="INC" />
+                <TextBlock Style="{StaticResource HeaderValue}" Text="{Binding Incidents}" />
+            </StackPanel>
+        </StackPanel>
+    </DockPanel>
+</UserControl>

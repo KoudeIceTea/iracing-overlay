@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <!-- Keep existing tray shortcuts pointing at the same executable. -->
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>bin\$(Configuration)\net10.0-windows\</OutputPath>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Assets\overlay.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>IracingOverlay</AssemblyName>
+    <RootNamespace>IracingOverlay.App</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Remove="System.Drawing;System.Windows.Forms" />
+    <EmbeddedResource Include="Assets\overlay.ico" />
+    <ProjectReference Include="..\IracingOverlay.Core\IracingOverlay.Core.csproj" />
+    <Resource Include="Assets\colored-car-icons-sprite.png;Assets\base-icons-sprite.png;Assets\flag-atlas.png;Assets\flag-atlas.json" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,168 @@
+<Window x:Class="IracingOverlay.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:settings="clr-namespace:IracingOverlay.App.Settings"
+        Title="iRacing Overlay"
+        Width="1040" Height="720" MinWidth="880" MinHeight="600" MaxWidth="1400" MaxHeight="1000"
+        WindowStartupLocation="CenterScreen" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextElement.Foreground="#EDF2F9" FontFamily="Segoe UI Variable Text, Segoe UI" FontSize="14">
+    <Window.Resources>
+        <ResourceDictionary Source="Themes/Settings.xaml" />
+    </Window.Resources>
+    <Window.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#11161D" Offset="0" />
+            <GradientStop Color="#0D1116" Offset="1" />
+        </LinearGradientBrush>
+    </Window.Background>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="256" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar background -->
+        <Border Grid.Column="0" Background="{StaticResource S.Sidebar}" BorderBrush="{StaticResource S.Stroke}" BorderThickness="0,0,1,0" />
+
+        <!-- Navigation + pages. The sidebar column hosts the nav items; branding and status sit on top of it. -->
+        <TabControl Grid.ColumnSpan="2" SelectedIndex="0" Background="Transparent" BorderThickness="0">
+            <TabControl.Template>
+                <ControlTemplate TargetType="TabControl">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="256" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel IsItemsHost="True" Margin="14,112,14,0" KeyboardNavigation.DirectionalNavigation="Cycle" />
+                        <ContentPresenter Grid.Column="1" x:Name="PART_SelectedContentHost" ContentSource="SelectedContent"
+                                          Margin="40,32,0,0" />
+                    </Grid>
+                </ControlTemplate>
+            </TabControl.Template>
+
+            <!-- ===== General ===== -->
+            <TabItem Header="General" Tag="&#xE713;">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Focusable="False">
+                    <settings:ReadableColumn Style="{StaticResource PageColumn}">
+                        <TextBlock Text="General" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Style="{StaticResource PageDescription}" Text="Behaviour that applies to all overlays." />
+
+                        <TextBlock Style="{StaticResource SectionLabel}" Text="Overlays" />
+                        <Border Style="{StaticResource SettingsGroup}">
+                            <StackPanel>
+                                <DockPanel Style="{StaticResource SettingRow}">
+                                    <TextBlock Style="{StaticResource RowIcon}" Text="&#xE7F4;" />
+                                    <Border DockPanel.Dock="Right" Background="{StaticResource S.AccentSoft}" CornerRadius="6" Padding="12,5" VerticalAlignment="Center">
+                                        <TextBlock x:Name="ModeText" Foreground="#9CCBFF" FontWeight="SemiBold" FontSize="13" />
+                                    </Border>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Style="{StaticResource SettingName}" Text="Overlay mode" />
+                                        <TextBlock x:Name="ShortcutHint" Style="{StaticResource SettingHint}" />
+                                    </StackPanel>
+                                </DockPanel>
+                                <Border Style="{StaticResource RowDivider}" />
+                                <DockPanel Style="{StaticResource SettingRow}">
+                                    <TextBlock Style="{StaticResource RowIcon}" Text="&#xE890;" />
+                                    <CheckBox x:Name="FocusCheck" VerticalAlignment="Center" AutomationProperties.Name="Hide overlays when iRacing loses focus">
+                                        <StackPanel>
+                                            <TextBlock Style="{StaticResource SettingName}" Text="Hide overlays when iRacing loses focus" />
+                                            <TextBlock Style="{StaticResource SettingHint}" Text="Overlays only show while the iRacing window is in front." />
+                                        </StackPanel>
+                                    </CheckBox>
+                                </DockPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Style="{StaticResource SectionLabel}" Text="Layout" />
+                        <Border Style="{StaticResource SettingsGroup}">
+                            <DockPanel Style="{StaticResource SettingRow}">
+                                <TextBlock Style="{StaticResource RowIcon}" Text="&#xE72C;" />
+                                <Button DockPanel.Dock="Right" Content="Reset" Click="OnResetPositions" VerticalAlignment="Center"
+                                        AutomationProperties.Name="Reset both overlay layouts" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource SettingName}" Text="Reset overlay layouts" />
+                                    <TextBlock Style="{StaticResource SettingHint}" Text="Restore the default position and scale of both overlays." />
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+
+                        <TextBlock Style="{StaticResource SettingHint}" Margin="2,4,0,0" Foreground="{StaticResource S.TextFaint}"
+                                   Text="Closing this window keeps the overlays running. To quit, choose Exit from the tray menu." />
+                    </settings:ReadableColumn>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ===== Standings ===== -->
+            <TabItem Header="Standings" Tag="&#xE8FD;">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" MaxWidth="760" HorizontalAlignment="Left">
+                        <TextBlock Text="Standings" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Style="{StaticResource PageDescription}" Text="Positions for every class, with gaps, lap times and iRating." />
+                    </StackPanel>
+                    <settings:OverlayOptions x:Name="StandingsOptions" />
+                </DockPanel>
+            </TabItem>
+
+            <!-- ===== Relative ===== -->
+            <TabItem Header="Relative" Tag="&#xE8CB;">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" MaxWidth="760" HorizontalAlignment="Left">
+                        <TextBlock Text="Relative" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Style="{StaticResource PageDescription}" Text="The cars around you on track, with the time gap to each." />
+                    </StackPanel>
+                    <settings:OverlayOptions x:Name="RelativeOptions" />
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Fuel" Tag="&#xE7B8;">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" MaxWidth="760" HorizontalAlignment="Left">
+                        <TextBlock Text="Fuel calculator" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Style="{StaticResource PageDescription}" Text="Fuel on board, lap consumption and estimated laps to empty for your car." />
+                    </StackPanel>
+                    <settings:OverlayOptions x:Name="FuelOptions" />
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+
+        <!-- Branding (top of sidebar) -->
+        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top" Margin="24,30,16,0" IsHitTestVisible="False">
+            <Border Width="38" Height="38" CornerRadius="10">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#4DA3FF" Offset="0" />
+                        <GradientStop Color="#2563C9" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <TextBlock Text="&#xE804;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="18" Foreground="White"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                <TextBlock Text="iRacing Overlay" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock Text="Settings" FontSize="12" Foreground="{StaticResource S.TextDim}" />
+            </StackPanel>
+        </StackPanel>
+
+        <!-- Connection status (bottom of sidebar) -->
+        <Border Grid.Column="0" VerticalAlignment="Bottom" Margin="14,0,14,16" Padding="14,12"
+                Background="{StaticResource S.Card}" BorderBrush="{StaticResource S.Stroke}" BorderThickness="1" CornerRadius="10">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Ellipse x:Name="StatusDot" Width="8" Height="8" Margin="0,0,9,0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="StatusText" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock FontSize="12" Foreground="{StaticResource S.TextDim}" TextTrimming="CharacterEllipsis" Margin="17,3,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding TrackName}" Value=""><Setter Property="Visibility" Value="Collapsed" /></DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                    <Run Text="{Binding TrackName, Mode=OneWay}" /> · <Run Text="{Binding SessionType, Mode=OneWay}" />
+                </TextBlock>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

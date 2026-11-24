@@ -1,0 +1,20 @@
+<UserControl x:Class="IracingOverlay.App.Overlays.FuelBand"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <StackPanel x:Name="Fields" Orientation="Horizontal" VerticalAlignment="Center">
+        <Border Tag="Title" Background="#32E9B547" Style="{StaticResource Pill}">
+            <TextBlock Text="FUEL" Foreground="#FFD37B" Style="{StaticResource PillText}" />
+        </Border>
+        <StackPanel Tag="Level" Orientation="Horizontal" Margin="0,0,10,0" VerticalAlignment="Center">
+            <Border Width="38" Height="6" Background="#394654" CornerRadius="3" VerticalAlignment="Center" Margin="0,0,6,0">
+                <Border x:Name="Fill" HorizontalAlignment="Left" Width="0" Background="#60B5FA" CornerRadius="3" />
+            </Border>
+            <TextBlock x:Name="Level" Style="{StaticResource HeaderValue}" />
+        </StackPanel>
+        <StackPanel Tag="Range" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0">
+            <TextBlock Text="LAPS" Style="{StaticResource HeaderLabel}" Foreground="#B4C0D0" FontSize="10" />
+            <TextBlock x:Name="Range" Style="{StaticResource HeaderValue}" />
+        </StackPanel>
+        <TextBlock Tag="Samples" x:Name="Samples" VerticalAlignment="Center" FontSize="11" Foreground="#ABBDCD" Margin="0,0,4,0" />
+    </StackPanel>
+</UserControl>
