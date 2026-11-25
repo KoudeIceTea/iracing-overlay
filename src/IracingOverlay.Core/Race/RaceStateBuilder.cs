@@ -562,7 +562,10 @@ public static class RaceStateBuilder
             // Sitting in the garage (not in the world) counts as being in the pits.
             InPit: car.OnPitRoad || !car.InWorld,
             Relation: relation,
-            ClassColor: d.ClassColor);
+            ClassColor: d.ClassColor,
+            Flags: car.Flags,
+            FlagSeconds: car.FlagSeconds,
+            RepairLeft: car.RepairLeft);
     }
 
     private static float Wrap(float delta, float lapTime)

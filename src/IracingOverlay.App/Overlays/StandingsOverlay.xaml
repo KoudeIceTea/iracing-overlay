@@ -22,7 +22,6 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
-        <BooleanToVisibilityConverter x:Key="ShowFlag" />
         <DataTemplate DataType="{x:Type vm:ClassHeaderViewModel}">
             <local:FieldGrid Widths="{DynamicResource Content.Widths}" Style="{StaticResource ClassRow}">
                 <DockPanel Visibility="{DynamicResource Content.Class}" Grid.Column="{DynamicResource Index.Class}" Grid.ColumnSpan="{DynamicResource Content.ClassSpan}" Margin="12,0,8,0" VerticalAlignment="Center">
@@ -101,8 +100,10 @@
         </DataTemplate>
     </local:OverlayWindow.Resources>
 
+    <!-- Penalty badges sit in column 0 (left of the table) or 2 (right of it). -->
     <Grid HorizontalAlignment="Left">
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" MinWidth="{DynamicResource Panel.Width}" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
@@ -111,44 +112,27 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Border Style="{StaticResource GlassHeader}" Visibility="{DynamicResource Header.Visible}" Margin="{DynamicResource Header.Margin}">
+        <Border Grid.Column="1" Style="{StaticResource GlassHeader}" Visibility="{DynamicResource Header.Visible}" Margin="{DynamicResource Header.Margin}">
             <local:SessionStrip x:Name="HeaderStrip" />
         </Border>
 
         <!-- Standings body -->
-        <Border Grid.Row="1" Grid.RowSpan="2" Style="{StaticResource GlassPanel}" Visibility="{DynamicResource Body.Visible}" />
+        <Border Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" Style="{StaticResource GlassPanel}" Visibility="{DynamicResource Body.Visible}" />
 
-        <ItemsControl Grid.Row="1" Margin="1,0" ItemsSource="{Binding StandingItems}" ClipToBounds="True" />
-        <Border Grid.Row="2" Margin="1,0,1,6" Visibility="{DynamicResource Footer.Visible}" MinHeight="30" Padding="12,3">
+        <ItemsControl Grid.Row="1" Grid.Column="1" Margin="1,0" ItemsSource="{Binding StandingItems}" ClipToBounds="True" />
+        <Border Grid.Row="2" Grid.Column="1" Margin="1,0,1,6" Visibility="{DynamicResource Footer.Visible}" MinHeight="30" Padding="12,3">
             <local:SessionStrip x:Name="FooterStrip" />
         </Border>
-        <!-- The badge list uses the same items and heights as the table. Its auto-sized
-             gutter collapses to zero when every visible driver has a clean row. -->
-        <ItemsControl Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Left"
-                      ItemsSource="{Binding StandingItems}" Visibility="{DynamicResource Penalty.Visible}">
+        <!-- The badge list uses the same items and heights as the table. Its width is reserved (so the overlay,
+             and its edit outline, already include the room badges take) and grows for unusually wide badges. -->
+        <ItemsControl x:Name="PenaltyGutter" Grid.Row="1" Grid.Column="{DynamicResource Penalty.Column}" VerticalAlignment="Top"
+                      MinWidth="{DynamicResource Penalty.Width}" ItemsSource="{Binding StandingItems}" Visibility="{DynamicResource Penalty.Visible}">
             <ItemsControl.Resources>
                 <DataTemplate DataType="{x:Type vm:ClassHeaderViewModel}">
                     <Border Width="0" Style="{StaticResource ClassRow}" />
                 </DataTemplate>
                 <DataTemplate DataType="{x:Type vm:RowViewModel}">
-                    <Grid Height="{Binding RowHeight}">
-                        <Border Style="{StaticResource GlassPanel}" CornerRadius="4" Padding="4,1" Margin="3,0,0,0"
-                                Background="#ED191D24" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                Visibility="{Binding HasPenalty, Converter={StaticResource ShowFlag}}">
-                            <!-- Flags as icons (black, slowdown = furled black, meatball), then how long the most
-                                 important one has been up, "DQ", or your own repair time left. -->
-                            <StackPanel Orientation="Horizontal">
-                                <Image Width="23" Height="18" Source="{Binding BlackFlagIcon}" RenderOptions.BitmapScalingMode="HighQuality"
-                                       Visibility="{Binding BlackFlag, Converter={StaticResource ShowFlag}}" />
-                                <Image Width="23" Height="18" Source="{Binding SlowdownIcon}" RenderOptions.BitmapScalingMode="HighQuality"
-                                       Visibility="{Binding Slowdown, Converter={StaticResource ShowFlag}}" />
-                                <Image Width="23" Height="18" Source="{Binding RepairIcon}" RenderOptions.BitmapScalingMode="HighQuality"
-                                       Visibility="{Binding Meatball, Converter={StaticResource ShowFlag}}" />
-                                <TextBlock Text="{Binding PenaltyText}" VerticalAlignment="Center" FontSize="10.5" FontWeight="Bold"
-                                           Foreground="#FFF4F5F7" Margin="4,0,1,0" />
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+                    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource PenaltyBadge}" />
                 </DataTemplate>
             </ItemsControl.Resources>
         </ItemsControl>

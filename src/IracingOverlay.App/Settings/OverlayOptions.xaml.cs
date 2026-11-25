@@ -43,17 +43,14 @@ public partial class OverlayOptions : UserControl
                 EditedLayout.ShowColumnNames = enabled;
                 SaveLayout();
             });
-            BindToggle(PenaltyBadges, EditedLayout.ShowPenalties, enabled =>
-            {
-                if (_refreshing) return;
-                EditedLayout.ShowPenalties = enabled;
-                SaveLayout();
-            });
         }
         else
         {
-            StandingsOptions.Visibility = ColumnNamesCard.Visibility = Visibility.Collapsed;
+            StandingsOptions.Visibility = ColumnNames.Visibility = Visibility.Collapsed;
+            PenaltyBadges.Margin = new Thickness(0);
         }
+        if (overlay is StandingsOverlay or RelativeOverlay) BindPenaltyOptions();
+        else ColumnNamesCard.Visibility = Visibility.Collapsed;
         ShowOverlayTitle.Text = $"Show {overlay.Title}";
         AutomationProperties.SetName(ShowOverlay, ShowOverlayTitle.Text);
         ShowOverlay.IsChecked = overlay.OverlaySettings.Enabled;
@@ -90,6 +87,28 @@ public partial class OverlayOptions : UserControl
     }
 
     private (CheckBox Toggle, LayoutSession Session)[] _sessionToggles = [];
+
+    private void BindPenaltyOptions()
+    {
+        BindToggle(PenaltyBadges, EditedLayout.ShowPenalties, enabled =>
+        {
+            PenaltySideChoice.IsEnabled = enabled;
+            if (_refreshing) return;
+            EditedLayout.ShowPenalties = enabled;
+            SaveLayout();
+        });
+        PenaltySideChoice.Items.Add(new ComboBoxItem { Content = "Right of the table", Tag = BadgeSide.Right });
+        PenaltySideChoice.Items.Add(new ComboBoxItem { Content = "Left of the table", Tag = BadgeSide.Left });
+        var current = _overlay.PenaltiesOnLeft ? BadgeSide.Left : BadgeSide.Right;
+        PenaltySideChoice.SelectedItem = PenaltySideChoice.Items.Cast<ComboBoxItem>().First(item => (BadgeSide)item.Tag == current);
+        PenaltySideChoice.IsEnabled = EditedLayout.ShowPenalties;
+        PenaltySideChoice.SelectionChanged += (_, _) =>
+        {
+            if (PenaltySideChoice.SelectedItem is not ComboBoxItem { Tag: BadgeSide side }) return;
+            _overlay.OverlaySettings.PenaltySide = side;
+            SaveLayout();
+        };
+    }
 
     private void BindRadarOptions(App app)
     {

@@ -203,6 +203,14 @@
                     <StackPanel>
                         <CheckBox x:Name="ColumnNames" Content="Show column names beside the first class" />
                         <CheckBox x:Name="PenaltyBadges" Margin="0,10,0,0" Content="Show penalty badges beside drivers" />
+                        <DockPanel Margin="0,10,0,0">
+                            <ComboBox x:Name="PenaltySideChoice" DockPanel.Dock="Right" Width="190" VerticalAlignment="Center"
+                                      AutomationProperties.Name="Side of the table for penalty badges" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource SettingName}" Text="Penalty badge side" />
+                                <TextBlock Style="{StaticResource SettingHint}" Text="Same side in every session." />
+                            </StackPanel>
+                        </DockPanel>
                     </StackPanel>
                 </Border>
                 <TextBlock x:Name="ContentHint" Style="{StaticResource SettingHint}" Margin="2,0,0,12"

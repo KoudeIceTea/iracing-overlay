@@ -21,6 +21,8 @@ public class OverlayWindow : Window
 {
     internal const double MinScale = 0.5, MaxScale = 2.5;
     private const double BottomAnchorDistance = 48;
+    /// <summary>Room kept for penalty badges beside the table: one flag and its time.</summary>
+    private const double PenaltyGutterWidth = 76;
     internal event Action? ScaleChanged;
     private static readonly Brush EditBorderBrush = CreateEditBrush();
 
@@ -79,7 +81,11 @@ public class OverlayWindow : Window
         };
 
         // Rows come and go, so the glass shapes change size; only touch the region when they do.
-        LayoutUpdated += (_, _) => UpdateRegion();
+        LayoutUpdated += (_, _) =>
+        {
+            KeepTableInPlace();
+            UpdateRegion();
+        };
 
         // SizeChanged may fire before SizeToContent has resized the native window.
         // Measure its final pixel bounds after WPF finishes the layout pass.
@@ -238,9 +244,17 @@ public class OverlayWindow : Window
         Resources["Content.ClassSpan"] = classSpan;
         Resources["Content.Rows"] = rows ? Visibility.Visible : Visibility.Collapsed;
         Resources["Content.ClassRow"] = classSlot != 0 ? Visibility.Visible : Visibility.Collapsed;
+        if (this is StandingsOverlay or RelativeOverlay)
+        {
+            bool left = PenaltiesOnLeft;
+            Resources["Penalty.Visible"] = rows && layout.ShowPenalties ? Visibility.Visible : Visibility.Collapsed;
+            Resources["Penalty.Column"] = left ? 0 : 2;
+            Resources["Penalty.Width"] = PenaltyGutterWidth;
+            Resources["Penalty.Alignment"] = left ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+            Resources["Penalty.Margin"] = left ? new Thickness(0, 0, 3, 0) : new Thickness(3, 0, 0, 0);
+        }
         if (this is StandingsOverlay)
         {
-            Resources["Penalty.Visible"] = rows && layout.ShowPenalties ? Visibility.Visible : Visibility.Collapsed;
             Resources["Content.ColumnNames"] = labels ? Visibility.Visible : Visibility.Collapsed;
             Resources["Content.FirstClassRow"] = classSlot != 0 || labels ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -255,6 +269,33 @@ public class OverlayWindow : Window
         bool body = rows || classSlot != 0 || footer;
         Resources["Body.Visible"] = body ? Visibility.Visible : Visibility.Collapsed;
         Resources["Header.Margin"] = new Thickness(0, 0, 0, header && body ? 3 : 0);
+    }
+
+    /// <summary>Penalty badges left of the table (default for the relative, which usually sits at the right edge).</summary>
+    internal bool PenaltiesOnLeft => (_settings.PenaltySide ?? (this is RelativeOverlay ? BadgeSide.Left : BadgeSide.Right)) == BadgeSide.Left;
+
+    private double _leadingWidth = double.NaN;
+
+    /// <summary>
+    /// Badges left of the table: when their column changes width (badges turned on, moved to this side, an extra
+    /// wide badge, a new scale) the window grows or shrinks on its left, so the table itself doesn't move.
+    /// </summary>
+    private void KeepTableInPlace()
+    {
+        if (!IsVisible || _dragging) return;
+        double leading = FindName("PenaltyGutter") is FrameworkElement { Visibility: Visibility.Visible } gutter
+            && PenaltiesOnLeft ? gutter.ActualWidth * _scale.ScaleX : 0;
+        if (double.IsNaN(_leadingWidth))
+        {
+            _leadingWidth = leading;
+            return;
+        }
+        double change = leading - _leadingWidth;
+        if (Math.Abs(change) < 0.5) return;
+        _leadingWidth = leading;
+        Left -= change;
+        SavePosition();
+        Dispatcher.BeginInvoke(DispatcherPriority.Loaded, () => ClampToMonitor());
     }
 
     private bool ApplyBand(TableLayout layout, string section, IReadOnlyList<OverlayField> fields)

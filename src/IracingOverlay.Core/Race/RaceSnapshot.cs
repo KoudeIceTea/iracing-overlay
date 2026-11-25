@@ -131,7 +131,12 @@ public sealed record RelativeRow(
     bool IsFocus,
     bool InPit,
     LapRelation Relation,
-    uint ClassColor);
+    uint ClassColor,
+    DriverFlags Flags = DriverFlags.None,
+    /// <summary>Seconds the most important active flag has been up (DQ > black > meatball > slowdown).</summary>
+    double FlagSeconds = 0,
+    /// <summary>Your own car only: mandatory repair time left while the meatball is out.</summary>
+    double? RepairLeft = null);
 
 public sealed record RaceSnapshot(
     SessionHeader Header,

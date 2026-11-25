@@ -3,13 +3,23 @@
                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                      xmlns:local="clr-namespace:IracingOverlay.App.Overlays"
                      Title="Relative">
-    <StackPanel MinWidth="{DynamicResource Panel.Width}" HorizontalAlignment="Left">
-        <Border Style="{StaticResource GlassHeader}" Visibility="{DynamicResource Header.Visible}" Margin="{DynamicResource Header.Margin}">
+    <!-- Penalty badges sit in column 0 (left of the table) or 2 (right of it). -->
+    <Grid HorizontalAlignment="Left">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" MinWidth="{DynamicResource Panel.Width}" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Border Grid.Column="1" Style="{StaticResource GlassHeader}" Visibility="{DynamicResource Header.Visible}" Margin="{DynamicResource Header.Margin}">
             <local:SessionStrip x:Name="HeaderStrip" />
         </Border>
 
         <!-- Relative body -->
-        <Border Style="{StaticResource GlassPanel}" Visibility="{DynamicResource Body.Visible}" Padding="0,6,0,0">
+        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource GlassPanel}" Visibility="{DynamicResource Body.Visible}" Padding="0,6,0,0">
             <StackPanel>
                 <ItemsControl ItemsSource="{Binding RelativeRows}">
                     <ItemsControl.ItemTemplate>
@@ -51,5 +61,10 @@
                 </Border>
             </StackPanel>
         </Border>
-    </StackPanel>
+
+        <!-- Same rows and heights as the table; 7 = the body's border and top padding. Width reserved as in the standings. -->
+        <ItemsControl x:Name="PenaltyGutter" Grid.Row="1" Grid.Column="{DynamicResource Penalty.Column}" VerticalAlignment="Top" Margin="0,7,0,0"
+                      MinWidth="{DynamicResource Penalty.Width}" ItemsSource="{Binding RelativeRows}" ItemTemplate="{StaticResource PenaltyBadge}"
+                      Visibility="{DynamicResource Penalty.Visible}" />
+    </Grid>
 </local:OverlayWindow>

@@ -102,17 +102,22 @@ public sealed class RowViewModel : ObservableObject
     public bool HasTeam { get => _hasTeam; private set => Set(ref _hasTeam, value); }
     public double RowHeight { get => _rowHeight; private set => Set(ref _rowHeight, value); }
 
-    public void Update(StandingRow r, NameFormat names, bool showTeam)
+    private void SetFlags(DriverFlags flags, double seconds, double? repairLeft)
     {
-        if (_flags != r.Flags)
+        if (_flags != flags)
         {
-            _flags = r.Flags;
+            _flags = flags;
             OnPropertyChanged(nameof(HasPenalty));
             OnPropertyChanged(nameof(Meatball));
             OnPropertyChanged(nameof(BlackFlag));
             OnPropertyChanged(nameof(Slowdown));
         }
-        PenaltyText = PenaltyTime(r.Flags, r.FlagSeconds, r.RepairLeft);
+        PenaltyText = PenaltyTime(flags, seconds, repairLeft);
+    }
+
+    public void Update(StandingRow r, NameFormat names, bool showTeam)
+    {
+        SetFlags(r.Flags, r.FlagSeconds, r.RepairLeft);
         PositionChange = r.PositionsGained is int gained && gained != 0
             ? (gained > 0 ? "â–²" : "â–¼") + Math.Abs(gained).ToString(CultureInfo.InvariantCulture) : "";
         PositionChangeForeground = r.PositionsGained > 0 ? Palette.Green : Palette.Red;
@@ -154,6 +159,7 @@ public sealed class RowViewModel : ObservableObject
 
     public void Update(RelativeRow r, NameFormat names, bool showTeam)
     {
+        SetFlags(r.Flags, r.FlagSeconds, r.RepairLeft);
         SetTeam(showTeam ? r.TeamName : "");
         SetCommon(r.Position, r.CarNumber, DriverNames.Format(r.Name, names), r.License, r.LicenseColor, r.IRating, r.ClassColor, r.IsFocus, r.InPit, r.Icons);
         Gap = r.Gap;
@@ -182,6 +188,7 @@ public sealed class RowViewModel : ObservableObject
     {
         IsFocus = false;
         InPit = false;
+        SetFlags(DriverFlags.None, 0, null);
         RowBackground = Palette.Transparent;
         RowHeight = height;
         Opacity = 0;

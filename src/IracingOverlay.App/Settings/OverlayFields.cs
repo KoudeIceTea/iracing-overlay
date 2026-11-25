@@ -41,11 +41,9 @@ internal sealed class OverlayFields
         }
 
         static string Visibility(bool shown) => shown ? "Shown" : "Hidden";
-        if (this == Standings)
-        {
-            Compare("Content", "Column names", i => Visibility(layouts[i].ShowColumnNames));
+        if (this == Standings) Compare("Content", "Column names", i => Visibility(layouts[i].ShowColumnNames));
+        if (this == Standings || this == Relative)
             Compare("Content", "Penalty badges", i => Visibility(layouts[i].ShowPenalties));
-        }
 
         if (this == Delta)
             Compare("Content", "Compared with",

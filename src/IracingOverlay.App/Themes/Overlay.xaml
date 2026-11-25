@@ -192,6 +192,28 @@
         <Image Source="{Binding Flag}" AutomationProperties.Name="{Binding Icons.FlairName}"
                Style="{StaticResource DriverImage}" Width="18" Height="14" />
     </DataTemplate>
+    <!-- Penalty badge beside a driver row (standings and relative): flags as icons (black, slowdown = furled
+         black, meatball), then how long the most important one has been up, "DQ", or your own repair time left.
+         The overlay sets which side of the table it hugs (Penalty.Alignment / Penalty.Margin). -->
+    <BooleanToVisibilityConverter x:Key="ShowWhenTrue" />
+    <DataTemplate x:Key="PenaltyBadge">
+        <Grid Height="{Binding RowHeight}">
+            <Border Style="{StaticResource GlassPanel}" CornerRadius="4" Padding="4,1" Margin="{DynamicResource Penalty.Margin}"
+                    Background="#ED191D24" HorizontalAlignment="{DynamicResource Penalty.Alignment}" VerticalAlignment="Center"
+                    Visibility="{Binding HasPenalty, Converter={StaticResource ShowWhenTrue}}">
+                <StackPanel Orientation="Horizontal">
+                    <Image Width="23" Height="18" Source="{Binding BlackFlagIcon}" RenderOptions.BitmapScalingMode="HighQuality"
+                           Visibility="{Binding BlackFlag, Converter={StaticResource ShowWhenTrue}}" />
+                    <Image Width="23" Height="18" Source="{Binding SlowdownIcon}" RenderOptions.BitmapScalingMode="HighQuality"
+                           Visibility="{Binding Slowdown, Converter={StaticResource ShowWhenTrue}}" />
+                    <Image Width="23" Height="18" Source="{Binding RepairIcon}" RenderOptions.BitmapScalingMode="HighQuality"
+                           Visibility="{Binding Meatball, Converter={StaticResource ShowWhenTrue}}" />
+                    <TextBlock Text="{Binding PenaltyText}" VerticalAlignment="Center" FontSize="10.5" FontWeight="Bold"
+                               Foreground="#FFF4F5F7" Margin="4,0,1,0" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </DataTemplate>
     <!-- Driver name; in team races the team name in large type with the current driver small underneath -->
     <DataTemplate x:Key="DriverNameCell">
         <Grid VerticalAlignment="Center" HorizontalAlignment="Left" MaxWidth="{DynamicResource Name.MaxWidth}">

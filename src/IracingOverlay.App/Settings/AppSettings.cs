@@ -31,6 +31,10 @@ public sealed class OverlaySettings : TableLayout
         }
     }
     public bool FollowSpectatedCar { get; set; }
+    /// <summary>Standings / relative: which side of the table penalty badges go. Null = the overlay's default.</summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<BadgeSide>))]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public BadgeSide? PenaltySide { get; set; }
     /// <summary>NaN = not positioned yet; a default is computed on first show.</summary>
     public double Left { get; set; } = double.NaN;
     /// <summary>
@@ -79,6 +83,8 @@ public sealed class OverlaySettings : TableLayout
 }
 
 public sealed record ScreenPlacement(double X, double Y);
+
+public enum BadgeSide { Right, Left }
 
 public enum LayoutSession { Practice, Qualifying, Race }
 
