@@ -77,7 +77,7 @@ public partial class App : Application
         _telemetry.SnapshotUpdated += OnSnapshot;
         _telemetry.ConnectionChanged += connected => Dispatcher.BeginInvoke(() => SetConnected(connected));
 
-        Updates = new UpdateService(_settings);
+        Updates = new UpdateService();
         MainWindow = new MainWindow(this);
         // F6 is registered on this HWND even before settings are opened for the first time.
         new WindowInteropHelper(MainWindow).EnsureHandle();
@@ -86,6 +86,11 @@ public partial class App : Application
         Updates.NewVersionFound += release => _tray?.Notify("iRacing Overlay update",
             $"Version {release.Version} is available (you have {UpdateService.Current}). Click to open Settings.", OpenSettings);
         Updates.Start();
+        if (UpdateService.TakeInstallResult() is { } installed)
+            _tray.Notify("iRacing Overlay update", installed.Succeeded
+                ? $"Updated to version {UpdateService.Current}."
+                : $"The update could not be installed ({installed.Detail}). You're still on version {UpdateService.Current}.",
+                OpenSettings);
 
         _visibilityTimer.Tick += (_, _) => UpdateVisibility();
         UpdatePollingInterval();
@@ -107,6 +112,9 @@ public partial class App : Application
         IsExiting = true;
         Shutdown();
     }
+
+    /// <summary>Quits so the update installer, which waits for this process, can replace the app's files.</summary>
+    internal void ExitForUpdate() => ExitFromTray();
 
     protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
     {

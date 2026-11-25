@@ -15,17 +15,15 @@
     <AssemblyName>IracingOverlay</AssemblyName>
     <RootNamespace>IracingOverlay.App</RootNamespace>
     <!-- Release version: tag releases as v<Version> (see scripts/release.ps1); the update check compares against it. -->
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <Using Remove="System.Drawing;System.Windows.Forms" />
     <EmbeddedResource Include="Assets\overlay.ico" />
+    <EmbeddedResource Include="Updates\install-update.ps1" LogicalName="IracingOverlay.App.Updates.install-update.ps1" />
     <ProjectReference Include="..\IracingOverlay.Core\IracingOverlay.Core.csproj" />
     <Resource Include="Assets\colored-car-icons-sprite.png;Assets\base-icons-sprite.png;Assets\flag-atlas.png;Assets\flag-atlas.json" />
-  </ItemGroup>
-
-  <ItemGroup>
   </ItemGroup>
 
 </Project>

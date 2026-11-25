@@ -116,6 +116,8 @@ public partial class MainWindow : Window
 
     // ----- Updates -----
 
+    private string? _installError;
+
     private void ShowUpdateState()
     {
         var updates = _app.Updates;
@@ -123,37 +125,56 @@ public partial class MainWindow : Window
         VersionText.Text = $"Version {UpdateService.Current}";
         UpdateStatusText.Text = updates.Status switch
         {
+            _ when updates.IsInstalling => "Preparing the update…",
+            _ when _installError != null => $"Update failed: {_installError}",
             UpdateState.Idle => "Checks automatically on startup and every hour.",
             UpdateState.Checking => "Checking for updates…",
             UpdateState.UpToDate => "Up to date" + checkedAt,
-            UpdateState.Available => $"Version {updates.Latest!.Version} is available{checkedAt}",
+            UpdateState.Available when !UpdateService.CanInstall =>
+                $"Version {updates.Latest!.Version} is available · development build, install it from the release page",
+            UpdateState.Available => $"Version {updates.Latest!.Version} is available · the app restarts to install it",
             UpdateState.NoReleases => "No releases published yet" + checkedAt,
             _ => $"Couldn't check for updates: {updates.Error}{checkedAt}",
         };
-        bool canDownload = updates.Status == UpdateState.Available && updates.Latest?.AssetId != null;
-        DownloadUpdate.Visibility = canDownload ? Visibility.Visible : Visibility.Collapsed;
-        if (canDownload && DownloadUpdate.IsEnabled) DownloadUpdate.Content = $"Download {updates.Latest!.Tag}";
-        CheckUpdates.IsEnabled = updates.Status != UpdateState.Checking;
+        bool available = updates.Status == UpdateState.Available && updates.Latest != null &&
+            (updates.Latest.Asset != null || !UpdateService.CanInstall);
+        DownloadUpdate.Visibility = available ? Visibility.Visible : Visibility.Collapsed;
+        DownloadUpdate.IsEnabled = !updates.IsInstalling;
+        if (available && !updates.IsInstalling)
+            DownloadUpdate.Content = UpdateService.CanInstall ? $"Install {updates.Latest!.Tag}" : "Open release page";
+        CheckUpdates.IsEnabled = updates.Status != UpdateState.Checking && !updates.IsInstalling;
     }
 
-    private async void OnCheckUpdates(object sender, RoutedEventArgs e) => await _app.Updates.CheckAsync();
+    private async void OnCheckUpdates(object sender, RoutedEventArgs e)
+    {
+        _installError = null;
+        await _app.Updates.CheckAsync();
+    }
 
     private async void OnDownloadUpdate(object sender, RoutedEventArgs e)
     {
-        DownloadUpdate.IsEnabled = false;
+        var updates = _app.Updates;
+        if (!UpdateService.CanInstall)
+        {
+            if (updates.Latest is { } release) Process.Start(new ProcessStartInfo(release.PageUrl) { UseShellExecute = true });
+            return;
+        }
+
+        _installError = null;
         try
         {
-            var progress = new Progress<double>(done => DownloadUpdate.Content = $"Downloading… {done:P0}");
-            string path = await _app.Updates.DownloadAsync(progress);
-            DownloadUpdate.Content = "Downloaded";
-            UpdateStatusText.Text = $"Saved {Path.GetFileName(path)} in Downloads. Exit the app from the tray, extract the ZIP " +
-                "(over the old version or anywhere) and start it again. Your settings are kept.";
-            Process.Start("explorer.exe", $"/select,\"{path}\"");
+            var progress = new Progress<double>(done =>
+            {
+                if (updates.IsInstalling) DownloadUpdate.Content = done < 1 ? $"Downloading… {done:P0}" : "Verifying…";
+            });
+            await updates.PrepareInstallAsync(progress);
+            DownloadUpdate.Content = "Restarting…";
+            UpdateStatusText.Text = "Installing the update. The app restarts in a few seconds.";
+            _app.ExitForUpdate();
         }
         catch (Exception ex)
         {
-            DownloadUpdate.IsEnabled = true;
-            UpdateStatusText.Text = "Download failed: " + ex.Message;
+            _installError = ex.Message;
             ShowUpdateState();
         }
     }
