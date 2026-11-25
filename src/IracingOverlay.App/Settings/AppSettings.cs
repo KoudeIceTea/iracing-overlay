@@ -33,6 +33,12 @@ public sealed class OverlaySettings : TableLayout
     public bool FollowSpectatedCar { get; set; }
     /// <summary>NaN = not positioned yet; a default is computed on first show.</summary>
     public double Left { get; set; } = double.NaN;
+    /// <summary>
+    /// Default settings only: where the overlay first appears, as a fraction of the primary screen's free space
+    /// (0 = left / top edge, 1 = right / bottom edge), so the default layout fits any screen size.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public ScreenPlacement? Placement { get; set; }
     public double Top { get; set; } = double.NaN;
     /// <summary>Distance from the monitor bottom in DIPs when this overlay is anchored there.</summary>
     public double? BottomGap { get; set; }
@@ -71,6 +77,8 @@ public sealed class OverlaySettings : TableLayout
         SessionLayouts = null;
     }
 }
+
+public sealed record ScreenPlacement(double X, double Y);
 
 public enum LayoutSession { Practice, Qualifying, Race }
 
@@ -179,6 +187,21 @@ public sealed class AppSettings
         catch (Exception)
         {
             // Corrupt settings: fall back to defaults rather than refusing to start.
+        }
+        return Defaults();
+    }
+
+    /// <summary>The settings a new install starts with (Assets/default-settings.json).</summary>
+    public static AppSettings Defaults()
+    {
+        try
+        {
+            using var stream = typeof(AppSettings).Assembly.GetManifestResourceStream("IracingOverlay.App.default-settings.json");
+            if (stream != null) return JsonSerializer.Deserialize<AppSettings>(stream, JsonOptions) ?? new();
+        }
+        catch (Exception)
+        {
+            // A broken defaults file must never stop the app from starting.
         }
         return new();
     }

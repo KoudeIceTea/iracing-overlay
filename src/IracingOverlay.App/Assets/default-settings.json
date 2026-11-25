@@ -1,0 +1,134 @@
+{
+  "Standings": {
+    "Enabled": true,
+    "ShowInPractice": true,
+    "ShowInQualifying": true,
+    "ShowInRace": true,
+    "FollowSpectatedCar": true,
+    "Scale": 1.05,
+    "NameFormat": "Full",
+    "ShowTeamNames": true,
+    "FieldOverrides": {
+      "Content.Pit": false,
+      "Content.Gap": false
+    },
+    "FieldOrder": {
+      "Content": [
+        "Class",
+        "Position",
+        "Number",
+        "Brand",
+        "Flag",
+        "Name",
+        "Pit",
+        "Tyre",
+        "License",
+        "Rating",
+        "Gap",
+        "Interval",
+        "Best",
+        "Last",
+        "Average"
+      ]
+    },
+    "ShowColumnNames": true,
+    "Placement": {
+      "X": 0.0,
+      "Y": 0.0
+    }
+  },
+  "Relative": {
+    "Enabled": true,
+    "ShowInPractice": true,
+    "ShowInQualifying": true,
+    "ShowInRace": true,
+    "FollowSpectatedCar": false,
+    "Scale": 1,
+    "NameFormat": "Full",
+    "ShowTeamNames": null,
+    "FieldOverrides": {
+      "Header.Air": false,
+      "Header.Track": false
+    },
+    "FieldOrder": {},
+    "ShowColumnNames": true,
+    "Placement": {
+      "X": 1.0,
+      "Y": 1.0
+    }
+  },
+  "Fuel": {
+    "Enabled": true,
+    "ShowInPractice": true,
+    "ShowInQualifying": true,
+    "ShowInRace": true,
+    "FollowSpectatedCar": false,
+    "Scale": 1,
+    "NameFormat": "Full",
+    "ShowTeamNames": null,
+    "FieldOverrides": {},
+    "FieldOrder": {},
+    "ShowColumnNames": true,
+    "Placement": {
+      "X": 0.0,
+      "Y": 1.0
+    }
+  },
+  "Delta": {
+    "Enabled": true,
+    "ShowInPractice": true,
+    "ShowInQualifying": true,
+    "ShowInRace": true,
+    "FollowSpectatedCar": false,
+    "Scale": 1,
+    "NameFormat": "Full",
+    "ShowTeamNames": null,
+    "FieldOverrides": {},
+    "FieldOrder": {
+      "Content": [
+        "Bar",
+        "Sectors",
+        "SectorDeltas"
+      ]
+    },
+    "ShowColumnNames": true,
+    "Placement": {
+      "X": 0.6719,
+      "Y": 0.0
+    }
+  },
+  "Radar": {
+    "Enabled": true,
+    "ShowInPractice": true,
+    "ShowInQualifying": true,
+    "ShowInRace": true,
+    "FollowSpectatedCar": false,
+    "Scale": 1,
+    "NameFormat": "Full",
+    "ShowTeamNames": null,
+    "FieldOverrides": {},
+    "FieldOrder": {
+      "Content": [
+        "Car",
+        "Guides",
+        "Ahead",
+        "Behind"
+      ]
+    },
+    "ShowColumnNames": true,
+    "Placement": {
+      "X": 0.6137,
+      "Y": 0.5967
+    }
+  },
+  "RadarWarningDistance": 20,
+  "RadarHideWhenClear": true,
+  "UpdateHz": 10,
+  "HideWhenSimulatorUnfocused": false,
+  "GlassBlur": true,
+  "StandingsFocusClassRows": 10,
+  "StandingsOtherClassRows": 3,
+  "AnimateStandingsChanges": true,
+  "RelativeCarsAhead": 4,
+  "RelativeCarsBehind": 4
+}

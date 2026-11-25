@@ -275,7 +275,11 @@ public class OverlayWindow : Window
         if (useDefault)
         {
             UpdateLayout();
-            var p = DefaultPosition?.Invoke(this) ?? new Point(40, 40);
+            var p = _settings.Placement is { } placement
+                ? new Point(placement.X * Math.Max(0, SystemParameters.PrimaryScreenWidth - ActualWidth),
+                    placement.Y * Math.Max(0, SystemParameters.PrimaryScreenHeight - ActualHeight))
+                : DefaultPosition?.Invoke(this) ?? new Point(40, 40);
+            _settings.Placement = null; // from now on the saved position is used
             Left = p.X;
             Top = p.Y;
         }
@@ -345,11 +349,13 @@ public class OverlayWindow : Window
     /// </summary>
     protected virtual bool UsesGlass => true;
 
-    public void ResetPosition()
+    /// <summary>Back to the default layout: <paramref name="defaults"/> are this overlay's default settings.</summary>
+    public void ResetPosition(OverlaySettings defaults)
     {
         _settings.Left = _settings.Top = double.NaN;
         _settings.BottomGap = null;
-        SetScale(1.0);
+        _settings.Placement = defaults.Placement;
+        SetScale(defaults.Scale);
         if (IsVisible)
         {
             Hide();

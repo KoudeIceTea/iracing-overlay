@@ -83,7 +83,7 @@
                                         AutomationProperties.Name="Reset all overlay layouts" />
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Style="{StaticResource SettingName}" Text="Reset overlay layouts" />
-                                    <TextBlock Style="{StaticResource SettingHint}" Text="Restore the default position and scale of every overlay." />
+                                    <TextBlock Style="{StaticResource SettingHint}" Text="Restore the default position and size of every overlay." />
                                 </StackPanel>
                             </DockPanel>
                         </Border>

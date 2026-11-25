@@ -242,7 +242,12 @@ public partial class App : Application
 
     public void ResetPositions()
     {
-        foreach (var o in Overlays) o.ResetPosition();
+        var defaults = AppSettings.Defaults();
+        _standings!.ResetPosition(defaults.Standings);
+        _relative!.ResetPosition(defaults.Relative);
+        _fuel!.ResetPosition(defaults.Fuel);
+        _delta!.ResetPosition(defaults.Delta);
+        _radar!.ResetPosition(defaults.Radar);
         _settings.Save();
     }
 
