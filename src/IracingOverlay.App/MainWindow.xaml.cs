@@ -34,6 +34,8 @@ public partial class MainWindow : Window
         StandingsOptions.Attach(app, app.StandingsWindow);
         RelativeOptions.Attach(app, app.RelativeWindow);
         FuelOptions.Attach(app, app.FuelWindow);
+        DeltaOptions.Attach(app, app.DeltaWindow);
+        RadarOptions.Attach(app, app.RadarWindow);
         FocusCheck.IsChecked = app.Settings.HideWhenSimulatorUnfocused;
         FocusCheck.Checked += OnFocusToggled;
         FocusCheck.Unchecked += OnFocusToggled;

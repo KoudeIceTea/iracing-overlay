@@ -15,7 +15,7 @@
     <AssemblyName>IracingOverlay</AssemblyName>
     <RootNamespace>IracingOverlay.App</RootNamespace>
     <!-- Release version: tag releases as v<Version> (see scripts/release.ps1); the update check compares against it. -->
-    <Version>0.0.4</Version>
+    <Version>0.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>

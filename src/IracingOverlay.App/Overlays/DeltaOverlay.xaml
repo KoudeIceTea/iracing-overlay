@@ -1,0 +1,64 @@
+<local:OverlayWindow x:Class="IracingOverlay.App.Overlays.DeltaOverlay"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:IracingOverlay.App.Overlays" Title="Delta">
+    <local:OverlayWindow.Resources>
+        <ItemsPanelTemplate x:Key="SectorColumns">
+            <UniformGrid Rows="1" />
+        </ItemsPanelTemplate>
+    </local:OverlayWindow.Resources>
+    <StackPanel MinWidth="340" HorizontalAlignment="Left">
+        <Border x:Name="HeaderPanel" Style="{StaticResource GlassHeader}">
+            <local:DeltaBand x:Name="HeaderBand" />
+        </Border>
+        <Border x:Name="BodyPanel" Style="{StaticResource GlassPanel}" Padding="10,6">
+            <StackPanel>
+                <StackPanel x:Name="Rows">
+                    <!-- Delta bar: the number, and a bar growing left (gaining) or right (losing) from the centre. -->
+                    <StackPanel Tag="Bar" Margin="2,0,2,4">
+                        <TextBlock x:Name="DeltaValue" HorizontalAlignment="Center" FontSize="26" FontWeight="Bold" Text="—" />
+                        <Grid Height="8" Margin="0,1,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.ColumnSpan="2" Background="#26FFFFFF" CornerRadius="4" />
+                            <Border Background="#34D399" CornerRadius="4,0,0,4" RenderTransformOrigin="1,0.5">
+                                <Border.RenderTransform><ScaleTransform x:Name="GainScale" ScaleX="0" /></Border.RenderTransform>
+                            </Border>
+                            <Border Grid.Column="1" Background="#F87171" CornerRadius="0,4,4,0" RenderTransformOrigin="0,0.5">
+                                <Border.RenderTransform><ScaleTransform x:Name="LossScale" ScaleX="0" /></Border.RenderTransform>
+                            </Border>
+                            <Border Grid.ColumnSpan="2" Width="2" Margin="0,-2" Background="#CCFFFFFF" HorizontalAlignment="Center" />
+                        </Grid>
+                        <!-- What the delta is measured against. -->
+                        <TextBlock x:Name="ReferenceCaption" HorizontalAlignment="Center" Margin="0,4,0,0" FontSize="10.5"
+                                   Foreground="#B4C0D0" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+
+                    <ItemsControl Tag="Sectors" x:Name="SectorTimes" ItemsPanel="{StaticResource SectorColumns}" Margin="0,2">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Margin="2,0" Padding="0,2,0,3" CornerRadius="4" Background="{Binding Fill}" Opacity="{Binding Opacity}">
+                                    <StackPanel>
+                                        <TextBlock HorizontalAlignment="Center" FontSize="9" FontWeight="Bold" Foreground="#B4C0D0" Text="{Binding Label}" />
+                                        <TextBlock HorizontalAlignment="Center" FontSize="13" FontWeight="SemiBold" Foreground="{Binding TimeBrush}" Text="{Binding Time}" />
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <ItemsControl Tag="SectorDeltas" x:Name="SectorDeltas" ItemsPanel="{StaticResource SectorColumns}" Margin="0,2">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock HorizontalAlignment="Center" FontSize="12" FontWeight="SemiBold" Opacity="{Binding Opacity}"
+                                           Foreground="{Binding DeltaBrush}" Text="{Binding Delta}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+                <local:DeltaBand x:Name="FooterBand" MinHeight="24" Margin="2,2,0,0" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</local:OverlayWindow>

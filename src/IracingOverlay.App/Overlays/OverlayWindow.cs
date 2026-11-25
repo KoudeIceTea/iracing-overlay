@@ -333,8 +333,17 @@ public class OverlayWindow : Window
             ApplyWindowStyles();
             _regionDirty = true;
             UpdateRegion();
+            OnEditModeChanged();
         }
     }
+
+    protected virtual void OnEditModeChanged() { }
+
+    /// <summary>
+    /// Overlays drawn on glass panels clip the window to those panels (and blur the game behind them). Overlays
+    /// without panels draw straight over the game instead.
+    /// </summary>
+    protected virtual bool UsesGlass => true;
 
     public void ResetPosition()
     {
@@ -399,6 +408,13 @@ public class OverlayWindow : Window
     private void UpdateRegion()
     {
         if (_hwnd == IntPtr.Zero || !IsVisible) return;
+        if (!UsesGlass)
+        {
+            if (!_regionDirty) return;
+            _regionDirty = false;
+            NativeMethods.SetWindowRgn(_hwnd, IntPtr.Zero, true);
+            return;
+        }
         var dpi = VisualTreeHelper.GetDpi(this);
         _pendingPanels.Clear();
         foreach (var surface in _surfaces)

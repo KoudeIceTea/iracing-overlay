@@ -48,6 +48,8 @@ public sealed class TelemetryService : IDisposable
         LapHistory? lapHistory = null;
         FuelHistory? fuelHistory = null;
         FlagTracker? flagTracker = null;
+        SectorTimer? sectorTimer = null;
+        RadarTracker? radarTracker = null;
         var staleTimer = Stopwatch.StartNew();
 
         while (!_stop)
@@ -59,6 +61,8 @@ public sealed class TelemetryService : IDisposable
                 _session = null;
                 lapHistory = null;
                 fuelHistory = null;
+                sectorTimer = null;
+                radarTracker = null;
                 Thread.Sleep(1000);
                 continue;
             }
@@ -79,7 +83,8 @@ public sealed class TelemetryService : IDisposable
                     if (_session != null)
                     {
                         var snapshot = RaceStateBuilder.Build(frame, _session, Options,
-                            lapHistory ??= new LapHistory(), fuelHistory ??= new FuelHistory(), flagTracker ??= new FlagTracker());
+                            lapHistory ??= new LapHistory(), fuelHistory ??= new FuelHistory(), flagTracker ??= new FlagTracker(),
+                            sectorTimer ??= new SectorTimer(), radarTracker ??= new RadarTracker());
 
                         SetConnected(true);
                         SnapshotUpdated?.Invoke(snapshot);

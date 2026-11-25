@@ -1,3 +1,5 @@
+using IracingOverlay.Core.Race;
+
 namespace IracingOverlay.App.Settings;
 
 internal sealed record OverlayField(string Id, string Label, bool DefaultOn = true, int? ColumnWidth = null);
@@ -8,6 +10,20 @@ internal sealed class OverlayFields
     public static readonly OverlayFields Standings = new(true);
     public static readonly OverlayFields Relative = new(false);
     public static readonly OverlayFields Fuel = new();
+    public static readonly OverlayFields Delta = CreateDelta();
+    public static readonly OverlayFields Radar = new(
+        [new("Car", "Your car"), new("Guides", "Guide lines"), new("Behind", "Warning for a car close behind"),
+            new("Ahead", "Warning for a car close ahead")], [], []);
+
+    /// <summary>What the delta can be compared with, as shown in settings and on the overlay.</summary>
+    internal static readonly (DeltaReference Reference, string Label, string Short)[] DeltaReferences =
+    [
+        (DeltaReference.BestLap, "Your best lap", "BEST LAP"),
+        (DeltaReference.OptimalLap, "Your optimal lap (best sectors combined)", "OPTIMAL"),
+        (DeltaReference.SessionBestLap, "Session best lap (your class)", "SESSION BEST"),
+        (DeltaReference.SessionOptimalLap, "Session optimal lap (best sectors in your class)", "SESSION OPTIMAL"),
+        (DeltaReference.LastLap, "Your last lap", "LAST LAP"),
+    ];
     public IReadOnlyList<OverlayField> Content { get; }
     public IReadOnlyList<OverlayField> Header { get; }
     public IReadOnlyList<OverlayField> Footer { get; }
@@ -31,6 +47,10 @@ internal sealed class OverlayFields
             Compare("Content", "Penalty badges", i => Visibility(layouts[i].ShowPenalties));
         }
 
+        if (this == Delta)
+            Compare("Content", "Compared with",
+                i => DeltaReferences.FirstOrDefault(r => r.Reference == layouts[i].DeltaReference).Label ?? "");
+
         foreach (var (section, fields) in new[] { ("Content", Content), ("Header", Header), ("Footer", Footer) })
         {
             // Use the same order and defaults as the editor, including positions of hidden fields.
@@ -47,6 +67,29 @@ internal sealed class OverlayFields
             }
         }
         return differences;
+    }
+
+    private OverlayFields(IReadOnlyList<OverlayField> content, IReadOnlyList<OverlayField> header, IReadOnlyList<OverlayField> footer)
+    {
+        Content = content;
+        Header = header;
+        Footer = footer;
+    }
+
+    private static OverlayFields CreateDelta()
+    {
+        OverlayField[] content = [new("Bar", "Delta bar"), new("Sectors", "Sector times"),
+            new("SectorDeltas", "Sector deltas to your best", false)];
+        (string Id, string Label)[] band =
+        [
+            ("Title", "Delta label"), ("Reference", "Reference lap (what the delta compares with)"), ("Current", "Current lap time"),
+            ("Last", "Last lap"), ("Best", "Best lap"), ("Optimal", "Optimal lap (your best sectors)"),
+            ("SessionBest", "Class best lap"),
+        ];
+        string[] header = ["Title", "Current"], footer = ["Last", "Best", "Optimal"];
+        return new(content,
+            band.Select(f => new OverlayField(f.Id, f.Label, header.Contains(f.Id))).ToArray(),
+            band.Select(f => new OverlayField(f.Id, f.Label, footer.Contains(f.Id))).ToArray());
     }
 
     private OverlayFields()

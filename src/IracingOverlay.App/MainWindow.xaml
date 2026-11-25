@@ -80,10 +80,10 @@
                             <DockPanel Style="{StaticResource SettingRow}">
                                 <TextBlock Style="{StaticResource RowIcon}" Text="&#xE72C;" />
                                 <Button DockPanel.Dock="Right" Content="Reset" Click="OnResetPositions" VerticalAlignment="Center"
-                                        AutomationProperties.Name="Reset both overlay layouts" />
+                                        AutomationProperties.Name="Reset all overlay layouts" />
                                 <StackPanel VerticalAlignment="Center">
                                     <TextBlock Style="{StaticResource SettingName}" Text="Reset overlay layouts" />
-                                    <TextBlock Style="{StaticResource SettingHint}" Text="Restore the default position and scale of both overlays." />
+                                    <TextBlock Style="{StaticResource SettingHint}" Text="Restore the default position and scale of every overlay." />
                                 </StackPanel>
                             </DockPanel>
                         </Border>
@@ -139,6 +139,24 @@
                         <TextBlock Style="{StaticResource PageDescription}" Text="Fuel on board, lap consumption and estimated laps to empty for your car." />
                     </StackPanel>
                     <settings:OverlayOptions x:Name="FuelOptions" />
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Delta" Tag="&#xE916;">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" MaxWidth="760" HorizontalAlignment="Left">
+                        <TextBlock Text="Delta" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Style="{StaticResource PageDescription}" Text="Live time gained or lost against a reference lap, with coloured sector times." />
+                    </StackPanel>
+                    <settings:OverlayOptions x:Name="DeltaOptions" />
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Radar" Tag="&#xE707;">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" MaxWidth="760" HorizontalAlignment="Left">
+                        <TextBlock Text="Radar" Style="{StaticResource SettingsTitle}" />
+                        <TextBlock Style="{StaticResource PageDescription}" Text="A red bar when a car is beside you, a yellow arc when one is close behind or ahead. Every class counts." />
+                    </StackPanel>
+                    <settings:OverlayOptions x:Name="RadarOptions" />
                 </DockPanel>
             </TabItem>
         </TabControl>

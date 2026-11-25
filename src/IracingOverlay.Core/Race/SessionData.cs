@@ -32,6 +32,8 @@ public sealed record SessionDefinition(int Num, string Type, string Name, IReadO
 public sealed class SessionData
 {
     public string TrackName { get; private init; } = "";
+    /// <summary>Length of the racing line in metres (WeekendInfo.TrackLength, given in km).</summary>
+    public double TrackLengthMeters { get; private init; }
     public string IncidentLimit { get; private init; } = "";
     public int DriverCarIdx { get; private init; } = -1;
     public bool IsTeamRacing { get; private init; }
@@ -70,6 +72,9 @@ public sealed class SessionData
     /// the player's car; other cars use the same index scheme in practice (0 = dry, higher = wet).
     /// </summary>
     public IReadOnlyList<string> TyreCompounds { get; private init; } = [];
+
+    /// <summary>Where each timing sector starts, as a fraction of the lap (the first is 0, the start/finish line).</summary>
+    public IReadOnlyList<double> SectorStarts { get; private init; } = [];
 
     public SessionDefinition? GetSession(int num) => Sessions.FirstOrDefault(s => s.Num == num);
 
@@ -116,6 +121,7 @@ public sealed class SessionData
         return new SessionData
         {
             TrackName = weekend["TrackDisplayName"].Str(weekend["TrackName"].Str()),
+            TrackLengthMeters = weekend["TrackLength"].Float() * 1000,
             IncidentLimit = weekend["WeekendOptions"]["IncidentLimit"].Str(),
             IsTeamRacing = weekend["TeamRacing"].Int() == 1,
             SubSessionId = weekend["SubSessionID"].Int(),
@@ -130,6 +136,12 @@ public sealed class SessionData
             Drivers = drivers,
             Sessions = sessions,
             QualifyResults = ParseResults(root["QualifyResultsInfo"]["Results"]),
+            SectorStarts = root["SplitTimeInfo"]["Sectors"].Items
+                .Select(sector => (double)sector["SectorStartPct"].Float(-1))
+                .Where(start => start is >= 0 and < 1)
+                .Order()
+                .Distinct()
+                .ToList(),
             TyreCompounds = driverInfo["DriverTires"].Items
                 .OrderBy(t => t["TireIndex"].Int())
                 .Select(t => t["TireCompoundType"].Str())

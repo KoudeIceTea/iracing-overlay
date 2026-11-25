@@ -2,12 +2,34 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using IracingOverlay.App.ViewModels;
+using IracingOverlay.Core.Race;
 
 namespace IracingOverlay.App.Settings;
 
 public sealed class OverlaySettings : TableLayout
 {
     public bool Enabled { get; set; } = true;
+    /// <summary>Overlays that can be limited to some session types (the delta): where it shows while enabled.</summary>
+    public bool ShowInPractice { get; set; } = true;
+    public bool ShowInQualifying { get; set; } = true;
+    public bool ShowInRace { get; set; } = true;
+
+    internal bool ShowsIn(LayoutSession session) => session switch
+    {
+        LayoutSession.Qualifying => ShowInQualifying,
+        LayoutSession.Race => ShowInRace,
+        _ => ShowInPractice,
+    };
+
+    internal void SetShownIn(LayoutSession session, bool shown)
+    {
+        switch (session)
+        {
+            case LayoutSession.Qualifying: ShowInQualifying = shown; break;
+            case LayoutSession.Race: ShowInRace = shown; break;
+            default: ShowInPractice = shown; break;
+        }
+    }
     public bool FollowSpectatedCar { get; set; }
     /// <summary>NaN = not positioned yet; a default is computed on first show.</summary>
     public double Left { get; set; } = double.NaN;
@@ -45,6 +67,7 @@ public sealed class OverlaySettings : TableLayout
         FieldOverrides = selected.FieldOverrides;
         FieldOrder = selected.FieldOrder;
         ShowColumnNames = selected.ShowColumnNames;
+        DeltaReference = selected.DeltaReference;
         SessionLayouts = null;
     }
 }
@@ -58,11 +81,17 @@ public class TableLayout
 
     public bool ShowColumnNames { get; set; } = true;
 
+    /// <summary>Delta overlay: what the current lap is compared with.</summary>
+    [JsonConverter(typeof(JsonStringEnumConverter<DeltaReference>))]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public DeltaReference DeltaReference { get; set; }
+
     internal TableLayout Copy() => new()
     {
         FieldOverrides = new(FieldOverrides),
         FieldOrder = FieldOrder.ToDictionary(pair => pair.Key, pair => pair.Value.ToArray()),
         ShowColumnNames = ShowColumnNames,
+        DeltaReference = DeltaReference,
     };
 
     // Retain the visibility preference from the former standings penalty column.
@@ -106,6 +135,11 @@ public sealed class AppSettings
     public OverlaySettings Standings { get; set; } = new();
     public OverlaySettings Relative { get; set; } = new();
     public OverlaySettings Fuel { get; set; } = new();
+    public OverlaySettings Delta { get; set; } = new();
+    public OverlaySettings Radar { get; set; } = new();
+    /// <summary>Radar: a car this close ahead or behind (metres) shows a warning.</summary>
+    public int RadarWarningDistance { get; set; } = 10;
+    public bool RadarHideWhenClear { get; set; } = true;
     public int UpdateHz { get; set; } = 10;
     public bool HideWhenSimulatorUnfocused { get; set; }
     /// <summary>Real blur of the game behind the glass panels. Turn off if you want the last bit of GPU time.</summary>

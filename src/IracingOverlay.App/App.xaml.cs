@@ -25,6 +25,10 @@ public partial class App : Application
     private StandingsOverlay? _standings;
     private RelativeOverlay? _relative;
     private FuelOverlay? _fuel;
+    private DeltaOverlay? _delta;
+    private RadarOverlay? _radar;
+    /// <summary>The kind of session running now; overlays limited to some session types use it.</summary>
+    private LayoutSession _session;
     private RaceSnapshot? _pendingSnapshot;
     private int _applyQueued;
     internal OverlayMode Mode { get; private set; } = OverlayMode.Live;
@@ -37,7 +41,7 @@ public partial class App : Application
 
     public OverlayViewModel ViewModel => _viewModel;
     public AppSettings Settings => _settings;
-    private IEnumerable<OverlayWindow> Overlays => [_standings!, _relative!, _fuel!];
+    private IEnumerable<OverlayWindow> Overlays => [_standings!, _relative!, _fuel!, _delta!, _radar!];
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -60,6 +64,16 @@ public partial class App : Application
         _relative.Attach(_settings.Relative);
         _fuel = new FuelOverlay { DefaultPosition = w => new Point(area.Right - w.ActualWidth - 30, area.Top + 20) };
         _fuel.Attach(_settings.Fuel);
+        _delta = new DeltaOverlay { DefaultPosition = w => new Point(area.Left + (area.Width - w.ActualWidth) / 2, area.Top + 90) };
+        _delta.Attach(_settings.Delta);
+        _radar = new RadarOverlay
+        {
+            DefaultPosition = w => new Point(area.Left + (area.Width - w.ActualWidth) / 2, area.Top + area.Height * 0.55),
+            Range = _settings.RadarWarningDistance,
+            HideWhenClear = _settings.RadarHideWhenClear,
+            GlideTime = TimeSpan.FromMilliseconds(1000.0 / Math.Clamp(_settings.UpdateHz, 1, 60)),
+        };
+        _radar.Attach(_settings.Radar);
         _viewModel.StandingsNames = _settings.Standings.NameFormat;
         _relativeView.RelativeNames = _settings.Relative.NameFormat;
         _viewModel.StandingsTeams = _settings.Standings.TeamNames(defaultOn: true);
@@ -164,6 +178,30 @@ public partial class App : Application
     public OverlayWindow StandingsWindow => _standings!;
     public OverlayWindow RelativeWindow => _relative!;
     public OverlayWindow FuelWindow => _fuel!;
+    public OverlayWindow DeltaWindow => _delta!;
+    public OverlayWindow RadarWindow => _radar!;
+
+    internal void SetRadarWarningDistance(int metres)
+    {
+        _settings.RadarWarningDistance = metres;
+        _radar!.Range = metres;
+        _settings.Save();
+    }
+
+    internal void SetRadarHideWhenClear(bool hide)
+    {
+        _settings.RadarHideWhenClear = hide;
+        _radar!.HideWhenClear = hide;
+        _settings.Save();
+    }
+
+    /// <summary>Choose the session types an overlay appears in (while it's enabled).</summary>
+    internal void SetOverlaySession(OverlayWindow overlay, LayoutSession session, bool shown)
+    {
+        overlay.OverlaySettings.SetShownIn(session, shown);
+        UpdateVisibility();
+        _settings.Save();
+    }
 
     private RaceOptions RaceOptionsFromSettings() => new(
         FocusClassRows: _settings.StandingsFocusClassRows,
@@ -227,10 +265,15 @@ public partial class App : Application
         var type = snapshot.Header.SessionType;
         var session = type.Contains("qual", StringComparison.OrdinalIgnoreCase) ? LayoutSession.Qualifying
             : snapshot.Header.IsRace ? LayoutSession.Race : LayoutSession.Practice;
-        _standings!.SetSession(session);
-        _relative!.SetSession(session);
-        _fuel!.SetSession(session);
-        _fuel.Update(snapshot.Fuel);
+        foreach (var o in Overlays) o.SetSession(session);
+        if (_session != session)
+        {
+            _session = session;
+            UpdateVisibility();
+        }
+        _fuel!.Update(snapshot.Fuel);
+        _delta!.Update(snapshot.Delta);
+        _radar!.Update(snapshot.Radar);
         _viewModel.ApplyStandings(snapshot, _settings.AnimateStandingsChanges && _standings!.IsVisible);
         _relativeView.ApplyRelative(snapshot);
 
@@ -248,6 +291,8 @@ public partial class App : Application
             _viewModel.Clear();
             _relativeView.Clear();
             _fuel!.Update(new());
+            _delta!.Update(new());
+            _radar!.Update(new());
         }
         ConnectionStateChanged?.Invoke();
     }
@@ -271,7 +316,9 @@ public partial class App : Application
 
         foreach (var o in Overlays)
         {
-            if (Mode != OverlayMode.Off && o.OverlaySettings.Enabled && show) o.ShowOverlay();
+            // Edit mode shows every enabled overlay, so one limited to other session types can still be placed.
+            bool session = Mode == OverlayMode.Edit || o.OverlaySettings.ShowsIn(_session);
+            if (Mode != OverlayMode.Off && o.OverlaySettings.Enabled && session && show) o.ShowOverlay();
             else if (o.IsVisible) o.Hide();
         }
     }

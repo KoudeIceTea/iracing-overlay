@@ -60,6 +60,21 @@
                                 </StackPanel>
                             </CheckBox>
                         </DockPanel>
+                        <StackPanel x:Name="SessionsRow" Visibility="Collapsed">
+                            <Border Style="{StaticResource RowDivider}" />
+                            <DockPanel Style="{StaticResource SettingRow}">
+                                <TextBlock Style="{StaticResource RowIcon}" Text="&#xE787;" />
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <CheckBox x:Name="ShowInPractice" Content="Practice" Margin="0,0,22,0" />
+                                    <CheckBox x:Name="ShowInQualifying" Content="Qualifying" Margin="0,0,22,0" />
+                                    <CheckBox x:Name="ShowInRace" Content="Race" />
+                                </StackPanel>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource SettingName}" Text="Show in sessions" />
+                                    <TextBlock x:Name="SessionsHint" Style="{StaticResource SettingHint}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </DockPanel>
+                        </StackPanel>
                         <Border Style="{StaticResource RowDivider}" />
                         <DockPanel Style="{StaticResource SettingRow}">
                             <TextBlock Style="{StaticResource RowIcon}" Text="&#xE740;" />
@@ -74,6 +89,31 @@
                                 <TextBlock Style="{StaticResource SettingName}" Text="Overlay scale" />
                                 <TextBlock Style="{StaticResource SettingHint}" Text="You can also scroll on the overlay in Edit mode (F6)." />
                             </StackPanel>
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+
+                <TextBlock x:Name="RadarTitle" Style="{StaticResource SectionLabel}" Text="Radar" Visibility="Collapsed" />
+                <Border x:Name="RadarGroup" Style="{StaticResource SettingsGroup}" Visibility="Collapsed">
+                    <StackPanel>
+                        <DockPanel Style="{StaticResource SettingRow}">
+                            <TextBlock Style="{StaticResource RowIcon}" Text="&#xE707;" />
+                            <ComboBox x:Name="RadarRange" DockPanel.Dock="Right" Width="110" VerticalAlignment="Center"
+                                      AutomationProperties.Name="Warning distance" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource SettingName}" Text="Warning distance" />
+                                <TextBlock Style="{StaticResource SettingHint}" Text="A car this close ahead or behind shows a yellow warning. Off: the radar only appears for a car beside you." />
+                            </StackPanel>
+                        </DockPanel>
+                        <Border Style="{StaticResource RowDivider}" />
+                        <DockPanel Style="{StaticResource SettingRow}">
+                            <TextBlock Style="{StaticResource RowIcon}" Text="&#xE7B3;" />
+                            <CheckBox x:Name="RadarHideWhenClear" VerticalAlignment="Center" AutomationProperties.Name="Only show when cars are near">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource SettingName}" Text="Only show when cars are near" />
+                                    <TextBlock Style="{StaticResource SettingHint}" Text="Hide the radar while no car is beside you or within the warning distance. It always shows in Edit mode (F6)." />
+                                </StackPanel>
+                            </CheckBox>
                         </DockPanel>
                     </StackPanel>
                 </Border>
@@ -149,6 +189,16 @@
         <!-- ===== Content / Header / Footer: toggle + drag to reorder ===== -->
         <TabItem Header="Content">
             <settings:ReadableColumn Style="{StaticResource PageColumn}">
+                <Border x:Name="DeltaReferenceCard" Style="{StaticResource SettingsCard}" Margin="0,0,0,12" Visibility="Collapsed">
+                    <DockPanel MinHeight="40">
+                        <ComboBox x:Name="DeltaReferenceChoice" DockPanel.Dock="Right" Width="290" VerticalAlignment="Center"
+                                  AutomationProperties.Name="Compare the delta with" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource SettingName}" Text="Compare with" />
+                            <TextBlock Style="{StaticResource SettingHint}" Text="The lap the delta bar and number measure against." />
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
                 <Border x:Name="ColumnNamesCard" Style="{StaticResource SettingsCard}" Margin="0,0,0,12">
                     <StackPanel>
                         <CheckBox x:Name="ColumnNames" Content="Show column names beside the first class" />
@@ -160,14 +210,14 @@
                 <Border Style="{StaticResource SettingsCard}"><settings:ReorderableFields x:Name="ContentChoices" /></Border>
             </settings:ReadableColumn>
         </TabItem>
-        <TabItem Header="Header">
+        <TabItem x:Name="HeaderTab" Header="Header">
             <settings:ReadableColumn Style="{StaticResource PageColumn}">
                 <TextBlock Style="{StaticResource SettingHint}" Margin="2,0,0,12"
                            Text="Items in the bar above the table. Turn them all off to hide the bar." />
                 <Border Style="{StaticResource SettingsCard}"><settings:ReorderableFields x:Name="HeaderChoices" /></Border>
             </settings:ReadableColumn>
         </TabItem>
-        <TabItem Header="Footer">
+        <TabItem x:Name="FooterTab" Header="Footer">
             <settings:ReadableColumn Style="{StaticResource PageColumn}">
                 <TextBlock Style="{StaticResource SettingHint}" Margin="2,0,0,12"
                            Text="Items in the bar below the table. Turn them all off to hide the bar." />

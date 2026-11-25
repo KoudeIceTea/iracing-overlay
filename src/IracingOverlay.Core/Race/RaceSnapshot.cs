@@ -141,6 +141,8 @@ public sealed record RaceSnapshot(
     int SessionId, int SessionNumber, int StandingsFocus, double SampleTime)
 {
     public FuelSnapshot Fuel { get; init; } = new();
+    public DeltaSnapshot Delta { get; init; } = new();
+    public RadarSnapshot Radar { get; init; } = new();
 }
 
 public sealed record RaceOptions(

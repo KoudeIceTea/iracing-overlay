@@ -34,7 +34,7 @@ public static class RaceStateBuilder
     }
 
     public static RaceSnapshot Build(TelemetryFrame t, SessionData s, RaceOptions o, LapHistory? history = null,
-        FuelHistory? fuelHistory = null, FlagTracker? flags = null)
+        FuelHistory? fuelHistory = null, FlagTracker? flags = null, SectorTimer? sectors = null, RadarTracker? radar = null)
     {
         int sessionNumber = t.GetInt("SessionNum");
         int sessionId = t.GetInt("SessionUniqueID");
@@ -85,8 +85,49 @@ public static class RaceStateBuilder
                     && classes.FirstOrDefault(c => c[0].Driver.ClassId == own.Driver.ClassId) is { } ownClass
                     ? LapsToGo(t, ownClass[0]) : null,
             },
+            Delta = BuildDelta(t, sectors, player, sessionId, sessionNumber, s, cars),
+            Radar = radar?.Build(t, s, player, sessionId) ?? new(),
         };
     }
+
+    /// <summary>Your own lap timing. iRacing's deltas exist only for the car you drive, so this never follows the camera.</summary>
+    private static DeltaSnapshot BuildDelta(TelemetryFrame t, SectorTimer? sectors, int player, int sessionId, int sessionNumber,
+        SessionData s, Dictionary<int, Car> cars)
+    {
+        sectors?.Update(t, s, sessionId, sessionNumber);
+        bool driving = t.GetBool("IsOnTrack") && !s.IsReplay;
+        double? Delta(string name) => driving && t.GetBool(name + "_OK") ? t.GetDouble(name) : null;
+        static double? Time(double seconds) => seconds > 0 && double.IsFinite(seconds) ? seconds : null;
+        int playerClass = cars.TryGetValue(player, out var own) ? own.Driver.ClassId : -1;
+        var fastest = cars.Values.Where(c => c.Driver.ClassId == playerClass && c.BestLap > MinPlausibleLap)
+            .OrderBy(c => c.BestLap).FirstOrDefault();
+        double? bestLap = Time(t.GetDouble("LapBestLapTime")) ?? (own != null ? Time(own.BestLap) : null);
+        double? classBest = fastest?.BestLap;
+        // Optimal laps are added up from the sectors this app measured, which may miss the fastest ones (laps driven
+        // before it started, or out of iRacing's view). An optimal lap is never slower than the fastest real lap,
+        // and the class optimal never slower than your own optimal, so those cap the estimates.
+        double? optimal = Fastest(sectors?.TheoreticalBest(player), bestLap);
+        double? classOptimal = Fastest(sectors?.ClassOptimal(playerClass), classBest, optimal);
+        return new DeltaSnapshot
+        {
+            BestLapDelta = Delta("LapDeltaToBestLap"),
+            OptimalLapDelta = Delta("LapDeltaToOptimalLap"),
+            SessionBestLapDelta = Delta("LapDeltaToSessionBestLap"),
+            SessionOptimalLapDelta = Delta("LapDeltaToSessionOptimalLap"),
+            LastLapDelta = Delta("LapDeltaToSessionLastlLap"), // sic: iRacing's variable name
+            CurrentLap = driving ? Time(t.GetDouble("LapCurrentLapTime")) : null,
+            LastLap = Time(t.GetDouble("LapLastLapTime")) ?? (own != null ? Time(own.LastLap) : null),
+            BestLap = bestLap,
+            SessionBestLap = classBest,
+            SessionBestDriver = fastest == null ? "" : fastest.Idx == player ? "you" : fastest.Driver.UserName,
+            SessionOptimal = classOptimal,
+            TheoreticalBest = optimal,
+            Sectors = sectors?.Splits(player) ?? [],
+        };
+    }
+
+    private static double? Fastest(params double?[] times) =>
+        times.Where(time => time > 0).Min();
 
     private static double ClassSortKey(List<Car> classCars)
     {
