@@ -10,6 +10,7 @@ dotnet run --project src/IracingOverlay.App
 
 - Run iRacing in **borderless windowed** mode, because exclusive fullscreen hides overlays.
 - The app starts in the Windows notification area. Double-click the **iRacing Overlay** tray icon or right-click it and choose **Settings** to open the control panel. You can minimize it to the taskbar or close it to return to the tray. Choose **Exit** from the tray menu to close the overlays and stop the app.
+- **Settings → General → Start with Windows** starts the app in the tray when you sign in (a per-user startup entry, listed in Task Manager → Startup apps, where it can also be disabled). Only one copy runs at a time: launching it again opens the running copy's settings.
 - Enabled panels appear when the simulator executable starts, show a waiting state while telemetry loads, and disappear when it exits. This also works across simulator restarts.
 - Press **F6** to cycle **Off → Edit → Live → Off**, even with the control panel minimized. The app starts in **Live** with click-through panels. **Off** hides all panels. **Edit** outlines each enabled panel so you can drag it to move or scroll to resize. Returning to **Live** saves the layout.
 - In **Settings → General**, enable **Hide overlays when iRacing loses focus** to hide panels when you switch apps. It is off by default. **Edit** also allows a preview while the settings window has focus.

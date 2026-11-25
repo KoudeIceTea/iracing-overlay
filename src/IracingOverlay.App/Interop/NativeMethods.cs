@@ -19,6 +19,12 @@ internal static class NativeMethods
     public const uint MOD_NOREPEAT = 0x4000;
     public const uint VK_F6 = 0x75;
 
+    public const int ASFW_ANY = -1;
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool AllowSetForegroundWindow(int processId);
+
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool RegisterHotKey(IntPtr hwnd, int id, uint modifiers, uint virtualKey);

@@ -39,6 +39,11 @@ public partial class MainWindow : Window
         FocusCheck.IsChecked = app.Settings.HideWhenSimulatorUnfocused;
         FocusCheck.Checked += OnFocusToggled;
         FocusCheck.Unchecked += OnFocusToggled;
+        ShowStartupState();
+        StartupCheck.Checked += OnStartupToggled;
+        StartupCheck.Unchecked += OnStartupToggled;
+        // Task Manager can switch the entry off while this window is open elsewhere.
+        Activated += (_, _) => ShowStartupState();
 
         app.ConnectionStateChanged += UpdateStatus;
         app.Updates.Changed += ShowUpdateState;
@@ -112,6 +117,26 @@ public partial class MainWindow : Window
     private void OnFocusToggled(object sender, RoutedEventArgs e)
     {
         _app.SetHideWhenSimulatorUnfocused(FocusCheck.IsChecked == true);
+    }
+
+    private bool _showingStartup;
+
+    private void ShowStartupState()
+    {
+        _showingStartup = true;
+        StartupCheck.IsChecked = WindowsStartup.IsEnabled;
+        _showingStartup = false;
+    }
+
+    private void OnStartupToggled(object sender, RoutedEventArgs e)
+    {
+        if (_showingStartup) return;
+        bool wanted = StartupCheck.IsChecked == true;
+        bool done = WindowsStartup.SetEnabled(wanted);
+        ShowStartupState();
+        StartupHint.Text = done
+            ? "Starts in the tray when you sign in; overlays appear once iRacing runs. Turn this off before deleting the app."
+            : "Windows didn't allow changing the startup entry. Try again, or add a shortcut to the Startup folder yourself.";
     }
 
     private void OnResetPositions(object sender, RoutedEventArgs e) => _app.ResetPositions();

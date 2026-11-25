@@ -75,6 +75,20 @@
                             </StackPanel>
                         </Border>
 
+                        <TextBlock Style="{StaticResource SectionLabel}" Text="Startup" />
+                        <Border Style="{StaticResource SettingsGroup}">
+                            <DockPanel Style="{StaticResource SettingRow}">
+                                <TextBlock Style="{StaticResource RowIcon}" Text="&#xE7E8;" />
+                                <CheckBox x:Name="StartupCheck" VerticalAlignment="Center" AutomationProperties.Name="Start with Windows">
+                                    <StackPanel>
+                                        <TextBlock Style="{StaticResource SettingName}" Text="Start with Windows" />
+                                        <TextBlock x:Name="StartupHint" Style="{StaticResource SettingHint}"
+                                                   Text="Starts in the tray when you sign in; overlays appear once iRacing runs. Turn this off before deleting the app." />
+                                    </StackPanel>
+                                </CheckBox>
+                            </DockPanel>
+                        </Border>
+
                         <TextBlock Style="{StaticResource SectionLabel}" Text="Layout" />
                         <Border Style="{StaticResource SettingsGroup}">
                             <DockPanel Style="{StaticResource SettingRow}">

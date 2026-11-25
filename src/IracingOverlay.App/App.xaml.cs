@@ -20,6 +20,7 @@ public partial class App : Application
     private AppSettings _settings = new();
     private TelemetryService? _telemetry;
     private TrayIcon? _tray;
+    private SingleInstance? _instance;
     internal UpdateService Updates { get; private set; } = null!;
     internal bool IsExiting { get; private set; }
     private StandingsOverlay? _standings;
@@ -46,6 +47,14 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        _instance = new SingleInstance();
+        if (!_instance.IsFirst)
+        {
+            // Already running (in the tray): show that copy's settings instead of starting a second one.
+            _instance.OpenSettingsInFirst();
+            Shutdown();
+            return;
+        }
         _settings = AppSettings.Load();
 
         var area = SystemParameters.WorkArea;
@@ -100,6 +109,8 @@ public partial class App : Application
         Updates.NewVersionFound += release => _tray?.Notify("iRacing Overlay update",
             $"Version {release.Version} is available (you have {UpdateService.Current}). Click to open Settings.", OpenSettings);
         Updates.Start();
+        _instance.OnSecondLaunch(() => Dispatcher.BeginInvoke(OpenSettings));
+        WindowsStartup.FollowThisCopy();
         if (UpdateService.TakeInstallResult() is { } installed)
             _tray.Notify("iRacing Overlay update", installed.Succeeded
                 ? $"Updated to version {UpdateService.Current}."
@@ -138,6 +149,14 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        if (_instance is { IsFirst: false })
+        {
+            // A second copy that only passed the launch on: it never loaded settings, so mustn't save them.
+            _instance.Dispose();
+            base.OnExit(e);
+            return;
+        }
+        _instance?.Dispose();
         _visibilityTimer.Stop();
         Updates?.Dispose();
         _tray?.Dispose();
